@@ -7,20 +7,7 @@
 #include <iostream>
 #include <thread>
 
-class Connector : public SleepyDiscord::DiscordClient {
-    public:
-        std::string token;
-        using SleepyDiscord::DiscordClient::DiscordClient;
-        void onMessage(SleepyDiscord::Message m) override { resolve(m); }
-        void onReady(SleepyDiscord::Ready r) override { boot(); }
-    protected:
-        std::unique_ptr<SleepyDiscord::Channel> extrChannel(SleepyDiscord::Message);
-        std::unique_ptr<SleepyDiscord::Server>  extrServer (SleepyDiscord::Message);
-        std::string lastMsg(SleepyDiscord::Channel);
-    private:
-        void resolve(SleepyDiscord::Message m);
-        void boot();
-};
+#include "fetcher.h"
 
 class Window;
 
