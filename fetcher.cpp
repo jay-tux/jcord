@@ -65,27 +65,6 @@ void Connector::resolve(SleepyDiscord::Message m)
 void Connector::boot()
 {
     this->updateStatus("Make Jay Insane Again");
-
-    std::cout << "=== SERVER LIST ===" << std::endl;
-    auto servers = this->getServers().vector();
-    for(auto it = servers.begin(); it != servers.end(); it++)
-    {
-        auto channels = this->getServerChannels(it->ID).vector();
-        std::cout << it->name << "(" << channels.size() << " channels): " << std::endl;
-        for(auto ch = channels.begin(); ch != channels.end(); ch++)
-        {
-            std::cout << "\t#" << ch->name << ": " << this->lastMsg(*ch) << std::endl;
-        }
-    }
-    std::cout << "=== END OF SERVER LIST ===" << std::endl;
-
-    std::cout << "=== DIRECT MESSAGES LIST ===" << std::endl;
-    auto dms = this->getDirectMessageChannels().vector();
-    for(auto dm = dms.begin(); dm != dms.end(); dm++)
-    {
-        std::cout << dm->name << std::endl;
-    }
-    std::cout << "=== END OF DMS LIST ===" << std::endl;
 }
 
 #endif
