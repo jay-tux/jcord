@@ -60,6 +60,16 @@ void Fetcher::stop()
     this->discord->quit();
 }
 
+Window::Window()
+{
+    this->cli = new CLIUI();
+}
+
+Window::~Window()
+{
+    delete(this->cli);
+}
+
 void Window::setFetcher(Fetcher *f)
 {
     this->data = f;

@@ -3,9 +3,9 @@
 
 #include "libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
 #include "token.h"
+#include "ui.h"
 #include <iostream>
 #include <thread>
-//#include <ncurses>
 
 class Connector : public SleepyDiscord::DiscordClient {
     public:
@@ -36,10 +36,13 @@ class Fetcher {
 
 class Window {
     public:
+        Window();
+        ~Window();
         void setFetcher(Fetcher *f);
         void start();
     private:
         Fetcher *data;
+        CLIUI *cli;
 };
 
 #endif
