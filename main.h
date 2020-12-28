@@ -13,6 +13,8 @@
 #include "fetcher.h"
 
 #define FETCHKEY (SleepyDiscord::DiscordClient::GetMessagesKey::na)
+#define TEXT_CHANNEL (SleepyDiscord::Channel::ChannelType::SERVER_TEXT)
+#define BOOT_SERVER (0)
 
 typedef SleepyDiscord::Snowflake<SleepyDiscord::Server> ServerFlake;
 
@@ -25,16 +27,22 @@ class Fetcher {
         void stop();
         std::vector<SleepyDiscord::Server> *getServers();
         std::vector<std::string> *getServernames();
+        std::vector<std::string> *getChannelnames(int);
+        int getServerIndex();
         //std::vector<SleepyDiscord::Channel> *getChannels(ServerFlake);
         //std::vector<SleepyDiscord::Message> *getMessages(SleepyDiscord::Channel, uint8_t);
         //std::vector<SleepyDiscord::ServerMember> *getMembers(ServerFlake);
+    protected:
+        void fetchServer();
     private:
         Window *ui;
         Connector *discord;
         std::vector<SleepyDiscord::Server> servers;
         std::vector<std::string> servernames;
         std::vector<SleepyDiscord::Channel> channels;
+        std::vector<std::string> channelnames;
         std::vector<SleepyDiscord::ServerMember> members;
+        int curserver;
 };
 
 class Window {

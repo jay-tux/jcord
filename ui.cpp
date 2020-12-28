@@ -73,13 +73,14 @@ std::string firstLetters(std::string str)
     return res;
 }
 
-CLIUI::CLIUI(strVec *servers)
+CLIUI::CLIUI(strVec *servers, strVec *channels, int index)
 {
     //redirect buffer stuff
     std::ostream devnull(0);
     /*auto coutbuf =*/ std::cout.rdbuf(devnull.rdbuf());
 
     this->srv = servers;
+    this->chn = channels;
 
     main = nullptr;
     users = nullptr;
@@ -106,10 +107,10 @@ CLIUI::CLIUI(strVec *servers)
     get_window(&this->main, 0, MAIN_OFFSET, rows - HEIGHT_TYPE, cols - MAIN_OFFSET - WIDTH_MEMBERS);
     get_window(&this->bottom, rows - HEIGHT_TYPE, MAIN_OFFSET, HEIGHT_TYPE, cols - MAIN_OFFSET - WIDTH_MEMBERS);
     get_window(&this->users, 0, cols - WIDTH_MEMBERS, rows, WIDTH_MEMBERS);
-    this->render();
+    this->render(index);
 }
 
-void CLIUI::render()
+void CLIUI::render(int index)
 {
     //render servers
     if(this->servers != nullptr)
@@ -117,11 +118,23 @@ void CLIUI::render()
         waddbox(this->servers, SERVER_MARGIN_Y, SERVER_MARGIN_X, SERVER_H, SERVER_W, "DM's");
 
         int yoff = 2 * SERVER_MARGIN_Y + SERVER_H;
-        //std::vector<std::string> servers;//wtf? somehow get some servers?
         for(auto server = this->srv->begin(); server != this->srv->end(); server++)
         {
             waddbox(this->servers, yoff, SERVER_MARGIN_X, SERVER_H, SERVER_W, firstLetters(*server));
             yoff += SERVER_H;
+        }
+    }
+
+    if(this->channels != nullptr && this->chn != nullptr)
+    {
+        std::string servername = index == -1 ? "DM's" : (*this->srv)[index];
+        waddbox(this->channels, CHANNEL_MARGIN_Y, CHANNEL_MARGIN_X, CHANNEL_HEADER, CHANNEL_W, servername);
+
+        int yoff = 2 * CHANNEL_MARGIN_Y + CHANNEL_HEADER;
+        for(auto channel = this->chn->begin(); channel != this->chn->end(); channel++)
+        {
+            mvwaddnstr(this->channels, yoff, CHANNEL_MARGIN_X, (*channel).c_str(), CHANNEL_W);
+            yoff += CHANNEL_H;
         }
     }
 
