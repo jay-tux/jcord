@@ -77,7 +77,7 @@ CLIUI::CLIUI(strVec *servers)
 {
     //redirect buffer stuff
     std::ostream devnull(0);
-    auto coutbuf = std::cout.rdbuf(devnull.rdbuf());
+    /*auto coutbuf =*/ std::cout.rdbuf(devnull.rdbuf());
 
     this->srv = servers;
 
@@ -121,7 +121,7 @@ void CLIUI::render()
         for(auto server = this->srv->begin(); server != this->srv->end(); server++)
         {
             waddbox(this->servers, yoff, SERVER_MARGIN_X, SERVER_H, SERVER_W, firstLetters(*server));
-            yoff += SERVER_MARGIN_Y + SERVER_H;
+            yoff += SERVER_H;
         }
     }
 
