@@ -62,9 +62,16 @@ void Connector::resolve(SleepyDiscord::Message m)
     if(msg != "") this->sendMessage(m.channelID, msg);
 }
 
-void Connector::boot()
+void Connector::boot(SleepyDiscord::Ready r)
 {
     this->updateStatus("Make Jay Insane Again");
+    for(auto it = r.privateChannels.begin(); it != r.privateChannels.end(); it++)
+    {
+        this->DMs.push_back(*it);
+        this->DMnames.push_back("@" + (*it).name);
+    }
+    int i = this->DMs.size();
+    return;
 }
 
 #endif
