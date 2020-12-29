@@ -5,7 +5,11 @@
 #include <locale.h>
 #include <iostream>
 #include <vector>
-#include <functional>
+#include <sstream>
+#include "cursor.h"
+#include "color.h"
+
+#include <signal.h> //REMOVE THIS AFTER DEBUGGING!
 
 #define WIDTH_SERVERS 15
 #define WIDTH_CHANNELS 40
@@ -36,11 +40,23 @@ typedef std::vector<std::string> strVec;
 
 class CLIUI {
     public:
-        CLIUI(strVec *, strVec *, strVec *, strVec *, int);
+        CLIUI(strVec *, strVec *, strVec *, strVec *, int, int);
         ~CLIUI();
-        void render(int);
+        void render();
+        Cursor *getCursor();
+
+    protected:
+        void init_highlight();
+        void highlight_on(WINDOW *);
+        void highlight_shroud(WINDOW *);
+        void highlight_off(WINDOW *);
+        void prepare_highlight(WINDOW *, int, int, Tab, bool);
 
     private:
+        //cursor
+        Cursor cursor;
+        bool colors;
+        bool mod;
         //windows
         WINDOW *main;
         WINDOW *users;

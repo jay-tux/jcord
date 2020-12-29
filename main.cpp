@@ -25,7 +25,7 @@ std::string Fetcher::msgToString(SleepyDiscord::Message msg, bool isServer)
     {
         user = msg.author.username;
     }
-    
+
     if(msg.type == TYPE_DEFAULT)
     {
         return "@" + user + ": " + msg.content + (msg.embeds.size() != 0 ?
@@ -212,14 +212,14 @@ void Window::setFetcher(Fetcher *f)
         this->data->getChannelnames(server),
         this->data->getMembernames(server),
         this->data->getMessages(server, channel),
-        server);
+        server, channel);
 }
 
 void Window::start()
 {
     while(1)
     {
-        this->cli->render(this->data->getServerIndex());
+        this->cli->render();
         usleep(100000);
     }
 }
