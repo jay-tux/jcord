@@ -28,7 +28,7 @@ typedef SleepyDiscord::Snowflake<SleepyDiscord::Server> ServerFlake;
 
 class Window;
 
-class Fetcher {
+class Fetcher { //MVC: MODEL
     public:
         Fetcher(Window *w, Connector *conn);
         void start();

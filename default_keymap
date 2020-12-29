@@ -1,0 +1,21 @@
+ === JCORD DEFAULT KEYMAP ===
+
+WASD to move                                                        ALTERNATIVES
+         W = go   up (if possible) one channel/message/user/server   arrow    up
+         D = go down (if possible) one channel/message/user/server   arrow  down
+         A = go   to the next pane  on the  left                     arrow  left
+         S = go   to the next pane  on the right                     arrow right
+
+ZXCFE for quick jumps
+         Z for  servers                                                      n/a
+         X for channels                                                      n/a
+         C for    input (not necessary to send messages)                     n/a
+         F for  members                                                      n/a
+         E for messages (main window)                                        n/a
+
+Other actions
+    CTRL D to exit                                                           n/a
+     ENTER to interact                                                     space
+         Q to exit a popup                                                   n/a
+         I to enter input mode (typing/sending mode)                         n/a
+    CTRL I to exit  input mode (typing/sending mode)                         n/a

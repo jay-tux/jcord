@@ -1,5 +1,5 @@
-#ifndef JCORD_MAIN_CPP
-#define JCORD_MAIN_CPP
+#ifndef JCORD_MAIN
+#define JCORD_MAIN
 
 #include "main.h"
 

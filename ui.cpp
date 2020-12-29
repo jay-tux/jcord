@@ -94,6 +94,7 @@ void get_window(WINDOW **w, int y0, int x0, int height, int width)
 {
     *w = newwin(height, width, y0, x0);
     werase(*w);
+    nodelay(*w, 1);
     box(*w, 0, 0);
     wrefresh(*w);
 }
@@ -259,6 +260,7 @@ CLIUI::CLIUI(strVec *servers, strVec *channels, strVec *users, strVec *messages,
 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
+    nodelay(stdscr, 1);
     this->width = cols;
     this->height = rows;
     //coord: in (row, col)
@@ -371,6 +373,14 @@ void CLIUI::render()
     }
 
     refresh();
+}
+
+Action CLIUI::resolveBindings()
+{
+    int key = getch();
+    //NOT USING SWITCH -> undefined keys (aka BIND_NO_KEY) all resolve to -1
+    // so if we'd use switch, we'd get "Error: duplicate case value" while compiling
+    return Action::NONE;
 }
 
 CLIUI::~CLIUI()
