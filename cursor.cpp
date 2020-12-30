@@ -38,7 +38,7 @@ Action focus_up(Cursor *c)
     switch(c->focused)
     {
         case Tab::SERVERS:
-            if(c->server > 0)  c->server--;
+            if(c->server >= 0)  c->server--;
             break;
         case Tab::CHANNELS:
             if(c->channel > 0) c->channel--;
