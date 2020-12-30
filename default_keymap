@@ -19,5 +19,5 @@ Other actions
     CTRL D to exit                                                           n/a
      ENTER to interact                                                     space
          Q to exit a popup                                                   n/a
-         I to enter input mode (typing/sending mode)                         n/a
-    CTRL I to exit  input mode (typing/sending mode)                         n/a
+         I to enter input mode (typing/sending mode)                           R
+    CTRL I to exit  input mode (typing/sending mode)                      CTRL R

@@ -219,9 +219,11 @@ void Window::start()
 {
     while(1)
     {
-        this->cli->render();
-        usleep(100000);
+        Action todo = this->cli->resolveBindings();
+        if(todo == Action::STOP) { break; }
+        if(todo != Action::NO_RERENDER) { this->cli->render(); }
     }
+    this->data->stop();
 }
 // </editor-fold>
 

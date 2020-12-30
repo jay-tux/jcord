@@ -30,9 +30,9 @@
 #define BIND_FOCUS_RIGHT KEY_RIGHT
 
 //indirect focus, alts
-#define BIND_FOCUS_UP_ALT     'a'
+#define BIND_FOCUS_UP_ALT     'w'
 #define BIND_FOCUS_DOWN_ALT   's'
-#define BIND_FOCUS_LEFT_ALT   'w'
+#define BIND_FOCUS_LEFT_ALT   'a'
 #define BIND_FOCUS_RIGHT_ALT  'd'
 
 //actions
@@ -46,8 +46,8 @@
 #define BIND_ACTION_QUIT_ALT        BIND_NO_KEY
 #define BIND_ACTION_ACT_ALT         ' '
 #define BIND_ACTION_EXIT_POPUP_ALT  BIND_NO_KEY
-#define BIND_ACTION_INPUT_MODE_ALT  BIND_NO_KEY
-#define BIND_ACTION_EXIT_INPUT_ALT  BIND_NO_KEY
+#define BIND_ACTION_INPUT_MODE_ALT  'r'
+#define BIND_ACTION_EXIT_INPUT_ALT  18 //CTRL-R
 
 #endif
 

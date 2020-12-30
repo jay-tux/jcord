@@ -243,7 +243,11 @@ CLIUI::CLIUI(strVec *servers, strVec *channels, strVec *users, strVec *messages,
     this->cursor.channel = channel;
     this->cursor.maxchannel = channels->size();
     this->cursor.highlighted = 0;
+    this->cursor.maxusers = users->size();
+    this->cursor.maxmsg = users->size();
     this->cursor.focused = Tab::USERS;
+    this->cursor.current = "";
+    this->cursor.strind = 0;
 
     main = nullptr;
     users = nullptr;
@@ -372,36 +376,51 @@ void CLIUI::render()
         wrefresh(this->main);
     }
 
+    if(this->bottom != nullptr)
+    {
+        prepare_highlight(this->bottom, 0, 0, Tab::TYPE, false);
+        box(this->bottom, 0, 0);
+        highlight_off(this->bottom);
+
+        wrefresh(this->bottom);
+    }
+
     refresh();
 }
 
 Action CLIUI::resolveBindings()
 {
     int key = getch();
+    if(key == ERR) { return Action::NO_RERENDER; }
     Action act = Action::NONE;
+    this->cursor.maxserver  = this->srv->size();
+    this->cursor.maxchannel = this->chn->size();
+    this->cursor.maxusers   = this->usr->size();
+    this->cursor.maxmsg     = this->msg->size();
+
     //NOT USING SWITCH -> undefined keys (aka BIND_NO_KEY) all resolve to -1
     // so if we'd use switch, we'd get "Error: duplicate case value" while compiling
     // instead, we'll use an easy macro, which checks if a binding is defined & if the key matches
 
     //direct focus
-    if(     IS_KEY(key, BIND_FOCUS_SERVER,      BIND_FOCUS_SERVER_ALT)) {}
-    else if(IS_KEY(key, BIND_FOCUS_CHANNEL,     BIND_FOCUS_CHANNEL_ALT)) {}
-    else if(IS_KEY(key, BIND_FOCUS_TYPE,        BIND_FOCUS_TYPE_ALT)) {}
-    else if(IS_KEY(key, BIND_FOCUS_MEMBERS,     BIND_FOCUS_MEMBERS_ALT)) {}
-    else if(IS_KEY(key, BIND_FOCUS_MESSAGES,    BIND_FOCUS_MESSAGES_ALT)) {}
+    if(     IS_KEY(key, BIND_FOCUS_SERVER,      BIND_FOCUS_SERVER_ALT))      { act = focus_direct(&this->cursor, Tab::SERVERS);  }
+    else if(IS_KEY(key, BIND_FOCUS_CHANNEL,     BIND_FOCUS_CHANNEL_ALT))     { act = focus_direct(&this->cursor, Tab::CHANNELS); }
+    else if(IS_KEY(key, BIND_FOCUS_TYPE,        BIND_FOCUS_TYPE_ALT))        { act = focus_direct(&this->cursor, Tab::TYPE);     }
+    else if(IS_KEY(key, BIND_FOCUS_MEMBERS,     BIND_FOCUS_MEMBERS_ALT))     { act = focus_direct(&this->cursor, Tab::USERS);    }
+    else if(IS_KEY(key, BIND_FOCUS_MESSAGES,    BIND_FOCUS_MESSAGES_ALT))    { act = focus_direct(&this->cursor, Tab::MESSAGES); }
     //indirect focus
-    else if(IS_KEY(key, BIND_FOCUS_UP,          BIND_FOCUS_UP_ALT)) {}
-    else if(IS_KEY(key, BIND_FOCUS_DOWN,        BIND_FOCUS_DOWN_ALT)) {}
-    else if(IS_KEY(key, BIND_FOCUS_LEFT,        BIND_FOCUS_LEFT_ALT)) {}
-    else if(IS_KEY(key, BIND_FOCUS_RIGHT,       BIND_FOCUS_RIGHT_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_UP,          BIND_FOCUS_UP_ALT))          { act = focus_up(   &this->cursor);                 }
+    else if(IS_KEY(key, BIND_FOCUS_DOWN,        BIND_FOCUS_DOWN_ALT))        { act = focus_down( &this->cursor);                 }
+    else if(IS_KEY(key, BIND_FOCUS_LEFT,        BIND_FOCUS_LEFT_ALT))        { act = focus_left( &this->cursor);                 }
+    else if(IS_KEY(key, BIND_FOCUS_RIGHT,       BIND_FOCUS_RIGHT_ALT))       { act = focus_right(&this->cursor);                 }
     //actions
-    else if(IS_KEY(key, BIND_ACTION_QUIT,       BIND_ACTION_QUIT_ALT)) {}
-    else if(IS_KEY(key, BIND_ACTION_ACT,        BIND_ACTION_ACT_ALT)) {}
-    else if(IS_KEY(key, BIND_ACTION_EXIT_POPUP, BIND_ACTION_EXIT_POPUP_ALT)) {}
-    else if(IS_KEY(key, BIND_ACTION_INPUT_MODE, BIND_ACTION_INPUT_MODE_ALT)) {}
-    else if(IS_KEY(key, BIND_ACTION_EXIT_INPUT, BIND_ACTION_EXIT_INPUT_ALT)) {}
+    else if(IS_KEY(key, BIND_ACTION_QUIT,       BIND_ACTION_QUIT_ALT))       { act = Action::STOP;                               }
+    else if(IS_KEY(key, BIND_ACTION_ACT,        BIND_ACTION_ACT_ALT))        { act = interact(&this->cursor);                    }
+    else if(IS_KEY(key, BIND_ACTION_EXIT_POPUP, BIND_ACTION_EXIT_POPUP_ALT)) { /*EXIT POPUP IF OPENED*/                          }
+    else if(IS_KEY(key, BIND_ACTION_INPUT_MODE, BIND_ACTION_INPUT_MODE_ALT)) { act = toggle_input(&this->cursor, true);          }
+    else if(IS_KEY(key, BIND_ACTION_EXIT_INPUT, BIND_ACTION_EXIT_INPUT_ALT)) { act = toggle_input(&this->cursor, false);         }
 
-    return Action::NONE;
+    return act;
 }
 
 CLIUI::~CLIUI()

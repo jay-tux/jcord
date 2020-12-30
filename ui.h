@@ -17,14 +17,7 @@
 
 typedef std::vector<std::string> strVec;
 
-typedef enum _action {
-    NONE,
-    CHANGE_SERVER,
-    CHANGE_CHANNEL,
-    SEND_MESSAGE
-} Action;
-
-class CLIUI { //MVC: VIEW
+class CLIUI { 
     public:
         CLIUI(strVec *, strVec *, strVec *, strVec *, int, int);
         ~CLIUI();
