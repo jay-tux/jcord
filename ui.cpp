@@ -19,7 +19,11 @@ void CLIUI::init_highlight()
                 init_color(CHANGED_OFF_BACK_INDEX, CHANGED_OFF_BACK_R, CHANGED_OFF_BACK_G, CHANGED_OFF_BACK_B);
                 init_color(CHANGED_OFF_FRONT_INDEX, CHANGED_OFF_FRONT_R, CHANGED_OFF_FRONT_G, CHANGED_OFF_FRONT_B);
                 init_pair(1, CHANGED_OFF_FRONT_INDEX, CHANGED_OFF_BACK_INDEX);
+
             }
+
+            //init inverted pair
+            init_pair(4, CHANGED_OFF_BACK_INDEX, CHANGED_OFF_FRONT_INDEX);
 
             //init shrouded colors
             init_color(CHANGED_SHROUD_BACK_INDEX, CHANGED_SHROUD_BACK_R, CHANGED_SHROUD_BACK_G, CHANGED_SHROUD_BACK_B);
@@ -31,6 +35,7 @@ void CLIUI::init_highlight()
             init_color(CHANGED_ON_FRONT_INDEX, CHANGED_ON_FRONT_R, CHANGED_ON_FRONT_G, CHANGED_ON_FRONT_B);
             init_pair(3 - USE_DEFAULT, CHANGED_ON_FRONT_INDEX, CHANGED_ON_BACK_INDEX);
 
+
         }
         else //use default macros
         {
@@ -39,6 +44,7 @@ void CLIUI::init_highlight()
             {
                 init_pair(1, DEFAULT_OFF_FRONT, DEFAULT_OFF_BACK);
             }
+            init_pair(4, DEFAULT_OFF_FRONT, DEFAULT_OFF_BACK);
             init_pair(2 - USE_DEFAULT, DEFAULT_SHROUD_FRONT, DEFAULT_SHROUD_BACK);
             init_pair(3 - USE_DEFAULT, DEFAULT_ON_FRONT, DEFAULT_ON_BACK);
         }
@@ -96,6 +102,7 @@ void get_window(WINDOW **w, int y0, int x0, int height, int width)
     werase(*w);
     nodelay(*w, 1);
     box(*w, 0, 0);
+    keypad(*w, 1);
     wrefresh(*w);
 }
 
@@ -192,6 +199,35 @@ std::string firstLetters(std::string str)
     return res;
 }
 
+std::string lastn(std::string str, int amount)
+{
+    if(amount >= (int)str.length())
+    {
+        return str.append(amount - (int)str.length(), ' ');
+        //return str;
+    }
+    return str.substr(str.length() - amount);
+}
+
+void addcursor(WINDOW *w, Cursor c)
+{
+    wattron(w, COLOR_PAIR(4));
+    int len = c.current.length();
+    if(len > MESSAGE_W)
+    {
+        if(c.strind < MESSAGE_W) { /*yet to accustom for in lastn*/ }
+        else
+        {
+            mvwaddch(w, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X + c.strind - len + MESSAGE_W,
+                    (c.strind == len) ? ' ' : c.current[c.strind]);
+        }
+    }
+    else
+    {
+        mvwaddch(w, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X + c.strind, (c.strind == len) ? ' ' : c.current[c.strind]);
+    }
+}
+
 //returns next start point
 int addMessage(WINDOW *w, int yoff, int x0, int miny, int maxw, std::string message, std::string tab)
 {
@@ -238,16 +274,7 @@ CLIUI::CLIUI(strVec *servers, strVec *channels, strVec *users, strVec *messages,
     this->chn = channels;
     this->msg = messages;
 
-    this->cursor.server = server;
-    this->cursor.maxserver = servers->size();
-    this->cursor.channel = channel;
-    this->cursor.maxchannel = channels->size();
-    this->cursor.highlighted = 0;
-    this->cursor.maxusers = users->size();
-    this->cursor.maxmsg = users->size();
-    this->cursor.focused = Tab::USERS;
-    this->cursor.current = "";
-    this->cursor.strind = 0;
+    setup_cursor(&this->cursor, server, servers->size(), channel, channels->size(), users->size(), messages->size());
 
     main = nullptr;
     users = nullptr;
@@ -258,9 +285,11 @@ CLIUI::CLIUI(strVec *servers, strVec *channels, strVec *users, strVec *messages,
     setlocale(LC_ALL, "");
     initscr();
     init_highlight();
-    cbreak();
+    raw();
     noecho();
     refresh();
+    keypad(stdscr, 1);
+    curs_set(0);
 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -382,6 +411,11 @@ void CLIUI::render()
         box(this->bottom, 0, 0);
         highlight_off(this->bottom);
 
+        std::string changed = lastn(this->cursor.current, MESSAGE_W);
+        mvwaddnstr(this->bottom, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X, changed.c_str(), MESSAGE_W);
+        addcursor(this->bottom, this->cursor);
+        highlight_off(this->bottom);
+
         wrefresh(this->bottom);
     }
 
@@ -397,6 +431,25 @@ Action CLIUI::resolveBindings()
     this->cursor.maxchannel = this->chn->size();
     this->cursor.maxusers   = this->usr->size();
     this->cursor.maxmsg     = this->msg->size();
+
+    if(this->cursor.inputmode) //input mode -> react by updating current string, cursor and/or exit input mode
+    {
+        //actions
+        if(     IS_KEY(key, BIND_ACTION_EXIT_INPUT, BIND_ACTION_EXIT_INPUT_ALT)) { act = toggle_input(&this->cursor, false); }
+        else if(IS_KEY(key, BIND_ACTION_QUIT,       BIND_ACTION_QUIT_ALT))       { act = Action::STOP;                       }
+        //input specific movements/actions
+        else if(IS_KEY(key, BIND_INPUT_SEND,        BIND_INPUT_SEND_ALT))        { act = interact(&this->cursor);            }
+        else if(IS_KEY(key, BIND_INPUT_BEGIN,       BIND_INPUT_BEGIN_ALT))       { act = input_up(&this->cursor);            }
+        else if(IS_KEY(key, BIND_INPUT_END,         BIND_INPUT_END_ALT))         { act = input_down(&this->cursor);          }
+        else if(IS_KEY(key, BIND_INPUT_BACKWARD,    BIND_INPUT_BACKWARD_ALT))    { act = input_left(&this->cursor);          }
+        else if(IS_KEY(key, BIND_INPUT_FORWARD,     BIND_INPUT_FORWARD_ALT))     { act = input_right(&this->cursor);         }
+        //modifies current message
+        else if(IS_CHR(key)) /*inserts at the current position*/                 { act = append(&this->cursor, key);         }
+        else if(IS_RMF(key)) /*'eats' at the cursor (delete)*/                   { act = remove(&this->cursor, true);        }
+        else if(IS_RMB(key)) /*removes the previous character (backspace)*/      { act = remove(&this->cursor, false);       }
+
+        return act;
+    }
 
     //NOT USING SWITCH -> undefined keys (aka BIND_NO_KEY) all resolve to -1
     // so if we'd use switch, we'd get "Error: duplicate case value" while compiling
@@ -418,7 +471,8 @@ Action CLIUI::resolveBindings()
     else if(IS_KEY(key, BIND_ACTION_ACT,        BIND_ACTION_ACT_ALT))        { act = interact(&this->cursor);                    }
     else if(IS_KEY(key, BIND_ACTION_EXIT_POPUP, BIND_ACTION_EXIT_POPUP_ALT)) { /*EXIT POPUP IF OPENED*/                          }
     else if(IS_KEY(key, BIND_ACTION_INPUT_MODE, BIND_ACTION_INPUT_MODE_ALT)) { act = toggle_input(&this->cursor, true);          }
-    else if(IS_KEY(key, BIND_ACTION_EXIT_INPUT, BIND_ACTION_EXIT_INPUT_ALT)) { act = toggle_input(&this->cursor, false);         }
+    //handled only when input is active
+    //else if(IS_KEY(key, BIND_ACTION_EXIT_INPUT, BIND_ACTION_EXIT_INPUT_ALT)) { act = toggle_input(&this->cursor, false);         }
 
     return act;
 }

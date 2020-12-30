@@ -3,6 +3,21 @@
 
 #include "cursor.h"
 
+void setup_cursor(Cursor *curs, int server, int servers, int channel, int channels, int users, int msgs)
+{
+    curs->server = server;
+    curs->maxserver = servers;
+    curs->channel = channel;
+    curs->maxchannel = channels;
+    curs->highlighted = 0;
+    curs->maxusers = users;
+    curs->maxmsg = msgs;
+    curs->focused = Tab::USERS;
+    curs->current = "";
+    curs->strind = 0;
+    curs->inputmode = false;
+}
+
 Action send_message(Cursor *c, std::string mess)
 {
     c->current = mess;
@@ -104,6 +119,47 @@ Action toggle_input(Cursor *c, bool enable)
 {
     c->inputmode = enable;
     if(enable) { c->focused = Tab::TYPE; }
+    return Action::NONE;
+}
+
+Action append(Cursor *c, char chr)
+{
+    if(c->strind == (int)c->current.length()) { c->current = c->current.append(1, chr); }
+    else { c->current = c->current.insert(c->strind, 1, chr); }
+    c->strind++;
+    return Action::NONE;
+}
+
+Action remove(Cursor *c, bool del)
+{
+    if(c->strind == (int)c->current.length() &&  del) { return Action::NONE; } //delete     at   end
+    if(c->strind == 0                        && !del) { return Action::NONE; } //backsp before begin
+    c->current = c->current.erase(del ? c->strind : (c->strind - 1), 1);
+    if(!del) { c->strind--; }
+    return Action::NONE;
+}
+
+Action input_left(Cursor *c)
+{
+    if(c->strind > 0) c->strind--;
+    return Action::NONE;
+}
+
+Action input_right(Cursor *c)
+{
+    if(c->strind < (int)c->current.length()) c->strind++;
+    return Action::NONE;
+}
+
+Action input_up(Cursor *c)
+{
+    c->strind = 0;
+    return Action::NONE;
+}
+
+Action input_down(Cursor *c)
+{
+    c->strind = c->current.length();
     return Action::NONE;
 }
 

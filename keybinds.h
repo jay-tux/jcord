@@ -49,6 +49,20 @@
 #define BIND_ACTION_INPUT_MODE_ALT  'r'
 #define BIND_ACTION_EXIT_INPUT_ALT  18 //CTRL-R
 
+//input mode movement
+#define BIND_INPUT_FORWARD  KEY_RIGHT
+#define BIND_INPUT_BACKWARD KEY_LEFT
+#define BIND_INPUT_BEGIN    KEY_UP
+#define BIND_INPUT_END      KEY_DOWN
+#define BIND_INPUT_SEND     KEY_ENTER
+
+//input mode movement, alts
+#define BIND_INPUT_FORWARD_ALT  BIND_NO_KEY
+#define BIND_INPUT_BACKWARD_ALT BIND_NO_KEY
+#define BIND_INPUT_BEGIN_ALT    BIND_NO_KEY
+#define BIND_INPUT_END_ALT      BIND_NO_KEY
+#define BIND_INPUT_SEND_ALT     BIND_NO_KEY
+
 #endif
 
 //for full key bindings, see the ncurses_keys file

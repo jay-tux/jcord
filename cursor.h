@@ -30,17 +30,25 @@ typedef struct _cursor {
     std::string current;
     int strind;
     bool inputmode;
+    int offset;
 } Cursor;
 
-/*Action change_server(Cursor *);
-Action change_channel(Cursor *);*/
-//Action send_message(Cursor *, std::string)
+void setup_cursor(Cursor *, int, int, int, int, int, int);
+
 Action focus_up(Cursor *);
 Action focus_down(Cursor *);
 Action focus_direct(Cursor *, Tab t);
 Action focus_left(Cursor *);
 Action focus_right(Cursor *);
+
 Action interact(Cursor *);
 Action toggle_input(Cursor *, bool);
+
+Action input_left(Cursor *);
+Action input_right(Cursor *);
+Action input_up(Cursor *);
+Action input_down(Cursor *);
+Action append(Cursor *, char);
+Action remove(Cursor *, bool); //true is delete, false is backspace
 
 #endif

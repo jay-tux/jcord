@@ -15,9 +15,13 @@
     ((key != BIND_NO_KEY && inp == key) || \
     (keyalt != BIND_NO_KEY && inp == keyalt))
 
+#define IS_CHR(inp) (inp >= 32 && inp <= 126)
+#define IS_RMF(inp) (inp == KEY_DC)
+#define IS_RMB(inp) (inp == KEY_BACKSPACE || inp == '\b' || inp == 127)
+
 typedef std::vector<std::string> strVec;
 
-class CLIUI { 
+class CLIUI {
     public:
         CLIUI(strVec *, strVec *, strVec *, strVec *, int, int);
         ~CLIUI();
