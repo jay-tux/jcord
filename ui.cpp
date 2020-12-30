@@ -377,7 +377,6 @@ void CLIUI::render()
     index = 0;
     if(this->users != nullptr && this->usr != nullptr)
     {
-
         //mvwprintw(this->users, USER_MARGIN_Y, USER_MARGIN_X, "%d users.", this->usr->size());
         int yoff = USER_MARGIN_Y;
         for(auto user = this->usr->begin(); user != this->usr->end(); user++)
@@ -395,12 +394,14 @@ void CLIUI::render()
     index = 0;
     if(this->main != nullptr && this->msg != nullptr)
     {
+        std::string ch = (*this->chn)[this->cursor.channel];
+        waddbox(this->main, MAIN_MINY, MAIN_MARGIN_X, MAIN_HEADER, this->width - MAIN_DIFF, ch);
         //mvwprintw(this->main, MAIN_MARGIN_BOT, MAIN_MARGIN_X, "%d messages.", this->msg->size());
         int yoff = this->height - MAIN_START;
         for(auto it = this->msg->begin(); it != this->msg->end(); it++)
         {
             prepare_highlight(this->main, index, this->cursor.highlighted, Tab::MESSAGES, false);
-            yoff = addMessage(this->main, yoff, MAIN_MARGIN_X, MAIN_MINY, this->width - MAIN_DIFF, *it, MAIN_MSG_TAB);
+            yoff = addMessage(this->main, yoff, MAIN_MARGIN_X, MAIN_MINY + MAIN_HEADER, this->width - MAIN_DIFF, *it, MAIN_MSG_TAB);
             highlight_off(this->main);
 
             index++;
