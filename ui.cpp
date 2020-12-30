@@ -199,33 +199,36 @@ std::string firstLetters(std::string str)
     return res;
 }
 
-std::string lastn(std::string str, int amount)
+std::string lastn(std::string str, int center, int amount, int *offset)
 {
-    if(amount >= (int)str.length())
+    int len = str.length();
+    if(len <= amount)
     {
+        *offset = 0;
         return str.append(amount - (int)str.length(), ' ');
-        //return str;
     }
-    return str.substr(str.length() - amount);
+
+    if(center - amount / 2 <= 0)
+    {
+        *offset = 0;
+        return str.substr(0, amount);
+    }
+
+    if(center + amount / 2 >= len)
+    {
+        *offset = len - amount;
+        return str.substr(len - amount, amount);
+    }
+
+    *offset = center - amount / 2;
+    return str.substr(center - amount / 2, center + amount / 2);
 }
 
-void addcursor(WINDOW *w, Cursor c)
+void addcursor(WINDOW *w, Cursor c, int offset)
 {
     wattron(w, COLOR_PAIR(4));
-    int len = c.current.length();
-    if(len > MESSAGE_W)
-    {
-        if(c.strind < MESSAGE_W) { /*yet to accustom for in lastn*/ }
-        else
-        {
-            mvwaddch(w, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X + c.strind - len + MESSAGE_W,
-                    (c.strind == len) ? ' ' : c.current[c.strind]);
-        }
-    }
-    else
-    {
-        mvwaddch(w, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X + c.strind, (c.strind == len) ? ' ' : c.current[c.strind]);
-    }
+    mvwaddch(w, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X + c.strind - offset,
+        (int)c.current.length() == c.strind ? ' ' : c.current[c.strind]);
 }
 
 //returns next start point
@@ -411,9 +414,11 @@ void CLIUI::render()
         box(this->bottom, 0, 0);
         highlight_off(this->bottom);
 
-        std::string changed = lastn(this->cursor.current, MESSAGE_W);
-        mvwaddnstr(this->bottom, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X, changed.c_str(), MESSAGE_W);
-        addcursor(this->bottom, this->cursor);
+        int offset;
+        std::string changed = lastn(this->cursor.current, this->cursor.strind, this->width - MESSAGE_DIFF - 1, &offset);
+        mvwaddch(this->bottom, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X + this->width - MESSAGE_DIFF, ' ');
+        mvwaddnstr(this->bottom, MESSAGE_MARGIN_Y, MESSAGE_MARGIN_X, changed.c_str(), this->width - MESSAGE_DIFF - 1);
+        addcursor(this->bottom, this->cursor, offset);
         highlight_off(this->bottom);
 
         wrefresh(this->bottom);
