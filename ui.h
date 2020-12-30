@@ -11,6 +11,10 @@
 #include "keybinds.h"
 #include "offsets.h"
 
+#define IS_KEY(inp, key, keyalt) \
+    ((key != BIND_NO_KEY && inp == key) || \
+    (keyalt != BIND_NO_KEY && inp == keyalt))
+
 typedef std::vector<std::string> strVec;
 
 typedef enum _action {

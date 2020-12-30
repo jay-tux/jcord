@@ -1,4 +1,6 @@
- === JCORD DEFAULT KEYMAP ===
+                +------------------------------------+
+                |    === JCORD DEFAULT KEYMAP ===    |
+                +------------------------------------+
 
 WASD to move                                                        ALTERNATIVES
          W = go   up (if possible) one channel/message/user/server   arrow    up

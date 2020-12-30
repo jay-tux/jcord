@@ -378,8 +378,29 @@ void CLIUI::render()
 Action CLIUI::resolveBindings()
 {
     int key = getch();
+    Action act = Action::NONE;
     //NOT USING SWITCH -> undefined keys (aka BIND_NO_KEY) all resolve to -1
     // so if we'd use switch, we'd get "Error: duplicate case value" while compiling
+    // instead, we'll use an easy macro, which checks if a binding is defined & if the key matches
+
+    //direct focus
+    if(     IS_KEY(key, BIND_FOCUS_SERVER,      BIND_FOCUS_SERVER_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_CHANNEL,     BIND_FOCUS_CHANNEL_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_TYPE,        BIND_FOCUS_TYPE_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_MEMBERS,     BIND_FOCUS_MEMBERS_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_MESSAGES,    BIND_FOCUS_MESSAGES_ALT)) {}
+    //indirect focus
+    else if(IS_KEY(key, BIND_FOCUS_UP,          BIND_FOCUS_UP_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_DOWN,        BIND_FOCUS_DOWN_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_LEFT,        BIND_FOCUS_LEFT_ALT)) {}
+    else if(IS_KEY(key, BIND_FOCUS_RIGHT,       BIND_FOCUS_RIGHT_ALT)) {}
+    //actions
+    else if(IS_KEY(key, BIND_ACTION_QUIT,       BIND_ACTION_QUIT_ALT)) {}
+    else if(IS_KEY(key, BIND_ACTION_ACT,        BIND_ACTION_ACT_ALT)) {}
+    else if(IS_KEY(key, BIND_ACTION_EXIT_POPUP, BIND_ACTION_EXIT_POPUP_ALT)) {}
+    else if(IS_KEY(key, BIND_ACTION_INPUT_MODE, BIND_ACTION_INPUT_MODE_ALT)) {}
+    else if(IS_KEY(key, BIND_ACTION_EXIT_INPUT, BIND_ACTION_EXIT_INPUT_ALT)) {}
+
     return Action::NONE;
 }
 
