@@ -12,10 +12,21 @@ void setup_cursor(Cursor *curs, int server, int servers, int channel, int channe
     curs->highlighted = 0;
     curs->maxusers = users;
     curs->maxmsg = msgs;
-    curs->focused = Tab::USERS;
+    curs->focused = Tab::SERVERS;
     curs->current = "";
     curs->strind = 0;
     curs->inputmode = false;
+}
+
+void reset_cursor(Cursor *curs, int channels, int users, int msgs)
+{
+    curs->channel = 0;
+    if(channels != -1) curs->maxchannel = channels;
+    curs->highlighted = 0;
+    if(users != -1) curs->maxusers = users;
+    if(msgs != -1) curs->maxmsg = msgs;
+    curs->current = "";
+    curs->strind = 0;
 }
 
 Action send_message(Cursor *c, std::string mess)

@@ -96,13 +96,18 @@ void CLIUI::highlight_shroud(WINDOW *w)
     wattron(w == nullptr ? stdscr : w, COLOR_PAIR(2 - USE_DEFAULT));
 }
 
+void ready_window(WINDOW *w)
+{
+    werase(w);
+    box(w, 0, 0);
+}
+
 void get_window(WINDOW **w, int y0, int x0, int height, int width)
 {
     *w = newwin(height, width, y0, x0);
-    werase(*w);
     nodelay(*w, 1);
-    box(*w, 0, 0);
     keypad(*w, 1);
+    ready_window(*w);
     wrefresh(*w);
 }
 
@@ -333,6 +338,7 @@ void CLIUI::render()
     //render servers
     if(this->servers != nullptr && this->srv != nullptr)
     {
+        ready_window(this->servers);
         //-1 = DM's
         prepare_highlight(this->servers, index - 1, this->cursor.server, Tab::SERVERS, true);
         waddbox(this->servers, SERVER_MARGIN_Y, SERVER_MARGIN_X, SERVER_H, SERVER_W, "DM's");
@@ -355,7 +361,7 @@ void CLIUI::render()
     index = 0;
     if(this->channels != nullptr && this->chn != nullptr)
     {
-
+        ready_window(this->channels);
         std::string servername = this->cursor.server == -1 ? "Friends" : (*this->srv)[this->cursor.server];
 
         waddbox(this->channels, CHANNEL_MARGIN_Y, CHANNEL_MARGIN_X, CHANNEL_HEADER, CHANNEL_W, servername);
@@ -377,6 +383,7 @@ void CLIUI::render()
     index = 0;
     if(this->users != nullptr && this->usr != nullptr)
     {
+        ready_window(this->users);
         //mvwprintw(this->users, USER_MARGIN_Y, USER_MARGIN_X, "%d users.", this->usr->size());
         int yoff = USER_MARGIN_Y;
         for(auto user = this->usr->begin(); user != this->usr->end(); user++)
@@ -394,6 +401,7 @@ void CLIUI::render()
     index = 0;
     if(this->main != nullptr && this->msg != nullptr)
     {
+        ready_window(this->main);
         std::string ch = (*this->chn)[this->cursor.channel];
         waddbox(this->main, MAIN_MINY, MAIN_MARGIN_X, MAIN_HEADER, this->width - MAIN_DIFF, ch);
         //mvwprintw(this->main, MAIN_MARGIN_BOT, MAIN_MARGIN_X, "%d messages.", this->msg->size());
@@ -411,6 +419,7 @@ void CLIUI::render()
 
     if(this->bottom != nullptr)
     {
+        ready_window(this->main);
         prepare_highlight(this->bottom, 0, 0, Tab::TYPE, false);
         box(this->bottom, 0, 0);
         highlight_off(this->bottom);
@@ -426,6 +435,11 @@ void CLIUI::render()
     }
 
     refresh();
+}
+
+Cursor *CLIUI::getCursor()
+{
+    return &this->cursor;
 }
 
 Action CLIUI::resolveBindings()

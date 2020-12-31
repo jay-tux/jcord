@@ -221,6 +221,34 @@ void Window::start()
     {
         Action todo = this->cli->resolveBindings();
         if(todo == Action::STOP) { break; }
+        //if(todo == Action::NONE || todo == Action::NO_RERENDER) { continue; }
+        int newindex;
+        std::vector<std::string> *ch, *us, *ms;
+
+        switch(todo)
+        {
+            case CHANGE_SERVER: {
+                    newindex = this->cli->getCursor()->server;
+                    ch = this->data->getChannelnames(newindex);
+                    us = this->data->getMembernames(newindex);
+                    ms = this->data->getMessages(newindex, 0);
+                    reset_cursor(this->cli->getCursor(), ch->size(), us->size(), ms->size());
+                    break;
+                }
+
+            case CHANGE_CHANNEL: {
+                    newindex = this->cli->getCursor()->channel;
+                    ms = this->data->getMessages(newindex, this->cli->getCursor()->server);
+                    this->cli->getCursor()->highlighted = 0;
+                    this->cli->getCursor()->maxmsg = ms->size();
+                    break;
+                }
+
+            case SEND_MESSAGE: { break; }
+            case LOAD_MORE_MESSAGES: { break; }
+            default: { break; } //compiler warnings are annoying
+        }
+        
         if(todo != Action::NO_RERENDER) { this->cli->render(); }
     }
     this->data->stop();

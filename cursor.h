@@ -34,6 +34,7 @@ typedef struct _cursor {
 } Cursor;
 
 void setup_cursor(Cursor *, int, int, int, int, int, int);
+void reset_cursor(Cursor *, int, int, int);
 
 Action focus_up(Cursor *);
 Action focus_down(Cursor *);

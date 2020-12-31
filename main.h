@@ -48,12 +48,12 @@ class Fetcher { //MVC: MODEL
         Window *ui;
         Connector *discord;
         std::vector<SleepyDiscord::Server> servers;
-        std::vector<std::string> servernames;
         std::vector<SleepyDiscord::Channel> channels;
-        std::vector<std::string> channelnames;
         std::vector<SleepyDiscord::User> members;
-        std::vector<std::string> membernames;
         std::vector<SleepyDiscord::Message> messages;
+        std::vector<std::string> servernames;
+        std::vector<std::string> channelnames;
+        std::vector<std::string> membernames;
         std::vector<std::string> messagecnts;
         int curserver;
         int curchan;
