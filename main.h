@@ -28,7 +28,7 @@ typedef SleepyDiscord::Snowflake<SleepyDiscord::Server> ServerFlake;
 
 class Window;
 
-class Fetcher { //MVC: MODEL
+class Fetcher : public IFetcher { //MVC: MODEL
     public:
         Fetcher(Window *w, Connector *conn);
         void start();
@@ -40,11 +40,14 @@ class Fetcher { //MVC: MODEL
         std::vector<std::string> *getMessages(int, int);
         int getServerIndex();
         int getChannelIndex();
+        bool sendMessage(std::string);
+        void onMessage(SleepyDiscord::Message);
+        bool force_render();
     protected:
         void fetchServer();
         void fetchChannel();
     private:
-        std::string msgToString(SleepyDiscord::Message msg, bool isServer);
+        std::string msgToString(SleepyDiscord::Message, bool);
         Window *ui;
         Connector *discord;
         std::vector<SleepyDiscord::Server> servers;
@@ -57,6 +60,7 @@ class Fetcher { //MVC: MODEL
         std::vector<std::string> messagecnts;
         int curserver;
         int curchan;
+        bool rerender;
 };
 
 class Window {

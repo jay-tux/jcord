@@ -106,6 +106,8 @@ Fetcher::Fetcher(Window *w, Connector *conn)
     this->curchan = BOOT_CHAN;
     this->ui = w;
     this->discord = conn;
+    this->discord->setFetcher(this);
+    this->rerender = false;
     this->servers = this->discord->getServers().vector();
     for(auto srv = this->servers.begin(); srv != this->servers.end(); srv++)
     {
@@ -157,6 +159,16 @@ std::vector<std::string> *Fetcher::getMembernames(int index)
     return nullptr;
 }
 
+bool Fetcher::force_render()
+{
+    if(this->rerender)
+    {
+        this->rerender = false;
+        return true;
+    }
+    return false;
+}
+
 std::vector<std::string> *Fetcher::getMessages(int chan, int server)
 {
     if(chan == this->curchan && server == this->curserver) { return &this->messagecnts; }
@@ -180,16 +192,23 @@ std::vector<std::string> *Fetcher::getMessages(int chan, int server)
     return nullptr;
 }
 
-/*
-std::vector<SleepyDiscord::Message> Fetcher::getMessages(SleepyDiscord::Channel chan, uint8_t cnt)
+bool Fetcher::sendMessage(std::string msg)
 {
-    return this->discord->getMessages(chan.ID, FETCHKEY, chan.lastMessageID, cnt).vector();
+    SleepyDiscord::Message res = (SleepyDiscord::Message)this->discord->sendMessage(this->channels[this->curchan].ID, msg);
+    return res.channelID.string() != "";
 }
+// </editor-fold>
 
-std::vector<SleepyDiscord::ServerMember> Fetcher::getMembers(ServerFlake server)
+// <editor-fold> IFetcher Events
+void Fetcher::onMessage(SleepyDiscord::Message msg)
 {
-    return this->discord->listMembers(server).vector();
-}*/
+    if(msg.channelID == this->channels[curchan].ID && msg.serverID == this->servers[curserver].ID)
+    {
+        this->messages.insert(this->messages.begin(), msg);
+        this->messagecnts.insert(this->messagecnts.begin(), this->msgToString(msg, this->curserver != -1));
+        this->rerender = true;
+    }
+}
 // </editor-fold>
 
 // <editor-fold> Window
@@ -244,12 +263,20 @@ void Window::start()
                     break;
                 }
 
-            case SEND_MESSAGE: { break; }
+            case SEND_MESSAGE: {
+                    this->data->sendMessage(this->cli->getCursor()->current);
+                    this->cli->getCursor()->current = "";
+                    this->cli->getCursor()->strind = 0;
+                    break;
+            }
             case LOAD_MORE_MESSAGES: { break; }
             default: { break; } //compiler warnings are annoying
         }
-        
-        if(todo != Action::NO_RERENDER) { this->cli->render(); }
+
+        if(todo != Action::NO_RERENDER || this->data->force_render())
+        {
+            this->cli->render();
+        }
     }
     this->data->stop();
 }

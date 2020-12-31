@@ -61,7 +61,7 @@
 #define BIND_INPUT_BACKWARD_ALT BIND_NO_KEY
 #define BIND_INPUT_BEGIN_ALT    BIND_NO_KEY
 #define BIND_INPUT_END_ALT      BIND_NO_KEY
-#define BIND_INPUT_SEND_ALT     BIND_NO_KEY
+#define BIND_INPUT_SEND_ALT     '\n'        //key_enter not always caught?
 
 #endif
 

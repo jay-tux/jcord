@@ -2,9 +2,6 @@
 #define JCORD_FETCHER
 
 #include "fetcher.h"
-//included here to avoid conflicts
-//#include <ncurses.h>
-//#include <locale.h>
 
 // <editor-fold> Convertors/Extractors
 std::unique_ptr<SleepyDiscord::Channel> Connector::extrChannel(SleepyDiscord::Message m)
@@ -46,10 +43,14 @@ std::string Connector::lastMsg(SleepyDiscord::Channel ch)
 }
 // </editor-fold>
 
+void Connector::setFetcher(IFetcher *f)
+{
+    this->f = f;
+}
 
 void Connector::resolve(SleepyDiscord::Message m)
 {
-    auto channel = this->extrChannel(m);
+    /*auto channel = this->extrChannel(m);
     auto server  = this->extrServer (m);
     std::cout << "Message in"
                 << " #" << ((!channel || channel->name == "") ? "(no channel)" : channel->name)
@@ -59,7 +60,8 @@ void Connector::resolve(SleepyDiscord::Message m)
     std::cout << "? ";
     std::string msg;
     std::getline(std::cin, msg);
-    if(msg != "") this->sendMessage(m.channelID, msg);
+    if(msg != "") this->sendMessage(m.channelID, msg);*/
+    if(this->f != nullptr) { f->onMessage(m); }
 }
 
 void Connector::boot(SleepyDiscord::Ready r)

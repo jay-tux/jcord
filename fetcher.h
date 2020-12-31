@@ -3,6 +3,11 @@
 
 #include "libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
 
+class IFetcher {
+    public:
+        virtual void onMessage(SleepyDiscord::Message) = 0;
+};
+
 class Connector : public SleepyDiscord::DiscordClient {
     public:
         std::string token;
@@ -11,6 +16,7 @@ class Connector : public SleepyDiscord::DiscordClient {
         void onReady(SleepyDiscord::Ready r) override { boot(r); }
         std::vector<SleepyDiscord::Channel> DMs;
         std::vector<std::string> DMnames;
+        void setFetcher(IFetcher *);
     protected:
         std::unique_ptr<SleepyDiscord::Channel> extrChannel(SleepyDiscord::Message);
         std::unique_ptr<SleepyDiscord::Server>  extrServer (SleepyDiscord::Message);
@@ -18,6 +24,7 @@ class Connector : public SleepyDiscord::DiscordClient {
     private:
         void resolve(SleepyDiscord::Message);
         void boot(SleepyDiscord::Ready);
+        IFetcher *f = nullptr;
 };
 
 #endif
