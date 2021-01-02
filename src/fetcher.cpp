@@ -1,7 +1,7 @@
 #ifndef JCORD_FETCHER
 #define JCORD_FETCHER
 
-#include "fetcher.h"
+#include "headers/fetcher.h"
 
 // <editor-fold> Convertors/Extractors
 std::unique_ptr<SleepyDiscord::Channel> Connector::extrChannel(SleepyDiscord::Message m)

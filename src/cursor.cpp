@@ -1,7 +1,7 @@
 #ifndef JCORD_CURSOR
 #define JCORD_CURSOR
 
-#include "cursor.h"
+#include "headers/cursor.h"
 
 void setup_cursor(Cursor *curs, int server, int servers, int channel, int channels, int users, int msgs)
 {

@@ -1,7 +1,7 @@
 #ifndef JCORD_UI
 #define JCORD_UI
 
-#include "ui.h"
+#include "headers/ui.h"
 
 void CLIUI::init_highlight()
 {

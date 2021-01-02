@@ -1,7 +1,7 @@
 #ifndef JCORD_MAIN_H
 #define JCORD_MAIN_H
 
-#include "libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
+#include "../../libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
 #include "token.h"
 #include "ui.h"
 #include "dmcache.h"

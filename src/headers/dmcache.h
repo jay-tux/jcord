@@ -1,7 +1,7 @@
 #ifndef JCORD_DMCACHE_H
 #define JCORD_DMCACHE_H
 
-#include "libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
+#include "../../libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
 #include <cstdlib>
 #include <fstream>
 #include <unistd.h>

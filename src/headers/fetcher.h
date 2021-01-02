@@ -1,7 +1,7 @@
 #ifndef JCORD_FETCHER_H
 #define JCORD_FETCHER_H
 
-#include "libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
+#include "../../libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
 
 class IFetcher {
     public:

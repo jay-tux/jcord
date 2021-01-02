@@ -1,7 +1,7 @@
 #ifndef JCORD_MAIN
 #define JCORD_MAIN
 
-#include "main.h"
+#include "headers/main.h"
 
 // <editor-fold> Fetcher
 std::string Fetcher::msgToString(SleepyDiscord::Message msg, bool isServer)
