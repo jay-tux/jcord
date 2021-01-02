@@ -1,6 +1,8 @@
 # JCORD - UNOFFICIAL DISCORD CLIENT
 *An unofficial Discord client (only for bot accounts), written in C++, using the [sleepy-discord](https://github.com/yourWaifu/sleepy-discord) library.*
 
+![Screenshot](./scrsh.png)
+
 ## Requirements
  1. **A Discord bot account:**  
    1. Go to https://discord.com/developers/applications and create a new Application using the blue button on top, then give it a nice name (this will be the "username" of your bot account; yes, you can change it later).  
@@ -59,6 +61,7 @@ To actually run JCord, you will need to open up a terminal each time. When it's 
 
 ## Configuring
 At the moment, configuring is done before building the library, but you might want to make sure you're able to build before spending a lot of time on configuring JCord (cause each time you change the configuration, you have to rebuilt it).  
+*Note:* This is going to change, but not right now...  
 **Warning:** if you change certain settings, you might break some stuff, so be careful! Always make a backup of the original file you change!  
 ### Changing colors
 This is the easiest (and probably also the safest) part.  
@@ -140,3 +143,9 @@ A lot of scary lines, right? Let's delve in (in the count, I'll skip the empty l
    * ``<MODE>`` is one of ``OFF`` (not highlighted at all, most elements are drawn in this color), ``SHROUDED`` (a little highlighted, to indicate which server/channel you're currently in) and ``ON`` (where your cursor currently is).  
    * ``<SIDE>`` is either ``BACK`` (for background) or ``FRONT`` (for foreground).  
    * ``<COMPONENT>`` is one of ``INDEX`` (ncurses color index), ``R`` (red component), ``G`` (green component) or ``B`` (blue component). Not that *ncurses colors range from 0 to 1000, not 0 to 256*.
+
+### Changing keybindings
+***TODO***
+
+### Changing offsets
+***TODO***
