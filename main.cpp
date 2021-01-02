@@ -62,7 +62,7 @@ void Fetcher::fetchServer()
         auto vec = this->dms->getCache();
         for(auto dm = vec.begin(); dm != vec.end(); dm++)
         {
-            SleepyDiscord::Channel fetched = (SleepyDiscord::Channel)this->discord->getChannel(*dm);
+            SleepyDiscord::Channel fetched = (SleepyDiscord::Channel)this->discord->getChannel(**dm);
             this->channels.push_back(fetched);
             this->channelnames.push_back("@" + fetched.recipients[0].username);
         }
@@ -130,8 +130,9 @@ Fetcher::Fetcher(Window *w, Connector *conn)
 
 Fetcher::~Fetcher()
 {
-    delete this->dms;
-    this->dms = nullptr;
+    //delete this->dms;
+    //we don't delete cause that would cause segfaults (in ~std::deque), somehow...
+    //this doesn't seem to cause memory leaks, as far as valgrind tells me ¯\_(ツ)_/¯
 }
 
 std::vector<SleepyDiscord::Server> *Fetcher::getServers() { return &this->servers; }
@@ -140,7 +141,12 @@ int Fetcher::getServerIndex() { return this->curserver; }
 int Fetcher::getChannelIndex() { return this->curchan; }
 
 void Fetcher::start() { this->discord->run(); }
-void Fetcher::stop() { this->discord->quit(); }
+
+void Fetcher::stop()
+{
+    this->dms->finalize();
+    this->discord->quit();
+}
 
 std::vector<std::string> *Fetcher::getChannelnames(int index)
 {
