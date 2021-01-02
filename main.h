@@ -4,6 +4,7 @@
 #include "libs/sleepy-discord/include/sleepy_discord/sleepy_discord.h"
 #include "token.h"
 #include "ui.h"
+#include "dmcache.h"
 #include <iostream>
 #include <thread>
 #include <unistd.h>
@@ -37,20 +38,25 @@ class Fetcher : public IFetcher { //MVC: MODEL
         std::vector<std::string> *getServernames();
         std::vector<std::string> *getChannelnames(int);
         std::vector<std::string> *getMembernames(int);
-        std::vector<std::string> *getMessages(int, int);
+        std::vector<std::string> *getMessages(int, int, bool);
         int getServerIndex();
         int getChannelIndex();
         bool sendMessage(std::string);
-        void onMessage(SleepyDiscord::Message);
         bool force_render();
+        std::vector<SleepyDiscord::Server> servers;
+
+        void onMessage(SleepyDiscord::Message);
+        void onReady(SleepyDiscord::Ready);
+        ~Fetcher();
     protected:
         void fetchServer();
         void fetchChannel();
+        bool ready;
     private:
         std::string msgToString(SleepyDiscord::Message, bool);
         Window *ui;
         Connector *discord;
-        std::vector<SleepyDiscord::Server> servers;
+        DMCache *dms;
         std::vector<SleepyDiscord::Channel> channels;
         std::vector<SleepyDiscord::User> members;
         std::vector<SleepyDiscord::Message> messages;

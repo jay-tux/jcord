@@ -36,8 +36,8 @@
 #define BIND_FOCUS_RIGHT_ALT  'd'
 
 //actions
-#define BIND_ACTION_QUIT         4  //CTRL-D
-#define BIND_ACTION_ACT        343  //RETURN
+#define BIND_ACTION_QUIT         4   //CTRL-D
+#define BIND_ACTION_ACT        '\n'  //RETURN
 #define BIND_ACTION_EXIT_POPUP  'q'  //q key
 #define BIND_ACTION_INPUT_MODE  'i'  //i key (like vim)
 #define BIND_ACTION_EXIT_INPUT   9   //CTRL-I

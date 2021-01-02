@@ -6,6 +6,7 @@
 class IFetcher {
     public:
         virtual void onMessage(SleepyDiscord::Message) = 0;
+        virtual void onReady(SleepyDiscord::Ready) = 0;
 };
 
 class Connector : public SleepyDiscord::DiscordClient {

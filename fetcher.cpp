@@ -50,17 +50,6 @@ void Connector::setFetcher(IFetcher *f)
 
 void Connector::resolve(SleepyDiscord::Message m)
 {
-    /*auto channel = this->extrChannel(m);
-    auto server  = this->extrServer (m);
-    std::cout << "Message in"
-                << " #" << ((!channel || channel->name == "") ? "(no channel)" : channel->name)
-                << " (" << ((!server  || server->name == "")  ? "(no server)"  : server->name)
-                << ") by " << m.author.username << ": "
-                << m.content << std::endl;
-    std::cout << "? ";
-    std::string msg;
-    std::getline(std::cin, msg);
-    if(msg != "") this->sendMessage(m.channelID, msg);*/
     if(this->f != nullptr) { f->onMessage(m); }
 }
 
@@ -73,7 +62,7 @@ void Connector::boot(SleepyDiscord::Ready r)
         this->DMnames.push_back("@" + (*it).name);
     }
     int i = this->DMs.size();
-    return;
+    if(this->f != nullptr) { f->onReady(r); }
 }
 
 #endif

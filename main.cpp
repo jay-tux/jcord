@@ -55,23 +55,39 @@ void Fetcher::fetchServer()
     this->channelnames.clear();
     this->members.clear();
     this->membernames.clear();
+    if(!this->ready) { return; } //wait till ready...
     if(this->curserver == -1)
     {
-        //do nothing cause there's nothing to do
+        //fetch DM cache
+        auto vec = this->dms->getCache();
+        for(auto dm = vec.begin(); dm != vec.end(); dm++)
+        {
+            SleepyDiscord::Channel fetched = (SleepyDiscord::Channel)this->discord->getChannel(*dm);
+            this->channels.push_back(fetched);
+            this->channelnames.push_back("@" + fetched.name);
+        }
     }
     else
     {
         //get server
-        ServerFlake flake = this->servers[this->curserver].ID;
-        std::vector<SleepyDiscord::Channel> data = this->discord->getServerChannels(flake).vector();
+        SleepyDiscord::Server s = this->servers[this->curserver];
+        std::vector<SleepyDiscord::Channel> data = this->discord->getServerChannels(s.ID).vector();
+        SleepyDiscord::Snowflake<SleepyDiscord::User> usr = this->discord->getID();
+        SleepyDiscord::ServerMember us = (SleepyDiscord::ServerMember)this->discord->getMember(s, usr);
+
         for(auto it = data.begin(); it != data.end(); it++)
         {
             if((*it).type != TEXT_CHANNEL) { continue; }
-            this->channels.push_back(*it);
-            this->channelnames.push_back("#" + (*it).name);
+            SleepyDiscord::Permission perms = SleepyDiscord::getPermissions(s, us, *it);
+            SleepyDiscord::Permission allow = perms & SleepyDiscord::Permission::VIEW_CHANNEL;
+            if(allow)
+            {
+                this->channels.push_back(*it);
+                this->channelnames.push_back("#" + (*it).name);
+            }
         }
 
-        std::vector<SleepyDiscord::ServerMember> mem = this->discord->listMembers(flake).vector();
+        std::vector<SleepyDiscord::ServerMember> mem = this->discord->listMembers(s.ID).vector();
         for(auto it = mem.begin(); it != mem.end(); it++)
         {
             SleepyDiscord::User u = (*it).user;
@@ -83,6 +99,7 @@ void Fetcher::fetchServer()
 
 void Fetcher::fetchChannel()
 {
+    if(!this->ready) { return; } //wait till ready...
     this->messages.clear();
     this->messagecnts.clear();
 
@@ -102,19 +119,19 @@ void Fetcher::fetchChannel()
 
 Fetcher::Fetcher(Window *w, Connector *conn)
 {
+    this->dms = new DMCache();
     this->curserver = BOOT_SERVER;
     this->curchan = BOOT_CHAN;
     this->ui = w;
     this->discord = conn;
     this->discord->setFetcher(this);
     this->rerender = false;
-    this->servers = this->discord->getServers().vector();
-    for(auto srv = this->servers.begin(); srv != this->servers.end(); srv++)
-    {
-        this->servernames.push_back((*srv).name);
-    }
-    fetchServer();
-    fetchChannel();
+}
+
+Fetcher::~Fetcher()
+{
+    delete this->dms;
+    this->dms = nullptr;
 }
 
 std::vector<SleepyDiscord::Server> *Fetcher::getServers() { return &this->servers; }
@@ -127,11 +144,11 @@ void Fetcher::stop() { this->discord->quit(); }
 
 std::vector<std::string> *Fetcher::getChannelnames(int index)
 {
-    if(index == -1)
+    /*if(index == -1)
     {
         this->curserver = index;
         return &this->discord->DMnames;
-    }
+    }*/
 
     if(index == this->curserver) { return &this->channelnames; }
 
@@ -169,9 +186,9 @@ bool Fetcher::force_render()
     return false;
 }
 
-std::vector<std::string> *Fetcher::getMessages(int chan, int server)
+std::vector<std::string> *Fetcher::getMessages(int chan, int server, bool override)
 {
-    if(chan == this->curchan && server == this->curserver) { return &this->messagecnts; }
+    if(chan == this->curchan && server == this->curserver && !override) { return &this->messagecnts; }
 
     if(server < (int)this->servers.size() && server >= -1)
     {
@@ -185,8 +202,13 @@ std::vector<std::string> *Fetcher::getMessages(int chan, int server)
         {
             this->curchan = chan;
             fetchChannel();
-            return &this->messagecnts;
         }
+        else
+        {
+            this->messagecnts.clear();
+            this->messages.clear();
+        }
+        return &this->messagecnts;
     }
 
     return nullptr;
@@ -208,6 +230,24 @@ void Fetcher::onMessage(SleepyDiscord::Message msg)
         this->messagecnts.insert(this->messagecnts.begin(), this->msgToString(msg, this->curserver != -1));
         this->rerender = true;
     }
+    else if(msg.serverID == "") //dm!
+    {
+        this->dms->receiveDM(msg);
+    }
+}
+
+void Fetcher::onReady(SleepyDiscord::Ready r) {
+    this->ready = true;
+    std::vector<SleepyDiscord::Server> tmp = this->discord->getServers().vector();
+    for(auto srv = tmp.begin(); srv != tmp.end(); srv++)
+    {
+        SleepyDiscord::Server actual = (SleepyDiscord::Server)this->discord->getServer((*srv).ID);
+        this->servers.push_back(actual);
+        this->servernames.push_back(actual.name);
+    }
+    this->fetchServer();
+    this->fetchChannel();
+    this->rerender = true;
 }
 // </editor-fold>
 
@@ -230,19 +270,19 @@ void Window::setFetcher(Fetcher *f)
     this->cli = new CLIUI(this->data->getServernames(),
         this->data->getChannelnames(server),
         this->data->getMembernames(server),
-        this->data->getMessages(server, channel),
+        this->data->getMessages(server, channel, false),
         server, channel);
 }
 
 void Window::start()
 {
+    int newindex;
+    std::vector<std::string> *ch, *us, *ms;
     while(1)
     {
         Action todo = this->cli->resolveBindings();
         if(todo == Action::STOP) { break; }
         //if(todo == Action::NONE || todo == Action::NO_RERENDER) { continue; }
-        int newindex;
-        std::vector<std::string> *ch, *us, *ms;
 
         switch(todo)
         {
@@ -250,14 +290,14 @@ void Window::start()
                     newindex = this->cli->getCursor()->server;
                     ch = this->data->getChannelnames(newindex);
                     us = this->data->getMembernames(newindex);
-                    ms = this->data->getMessages(newindex, 0);
+                    ms = this->data->getMessages(0, newindex, true);
                     reset_cursor(this->cli->getCursor(), ch->size(), us->size(), ms->size());
                     break;
                 }
 
             case CHANGE_CHANNEL: {
                     newindex = this->cli->getCursor()->channel;
-                    ms = this->data->getMessages(newindex, this->cli->getCursor()->server);
+                    ms = this->data->getMessages(newindex, this->cli->getCursor()->server, true);
                     this->cli->getCursor()->highlighted = 0;
                     this->cli->getCursor()->maxmsg = ms->size();
                     break;

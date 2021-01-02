@@ -315,7 +315,7 @@ CLIUI::CLIUI(strVec *servers, strVec *channels, strVec *users, strVec *messages,
     get_window(&this->main, 0, MAIN_OFFSET, rows - HEIGHT_TYPE, cols - MAIN_OFFSET - WIDTH_MEMBERS);
     get_window(&this->bottom, rows - HEIGHT_TYPE, MAIN_OFFSET, HEIGHT_TYPE, cols - MAIN_OFFSET - WIDTH_MEMBERS);
     get_window(&this->users, 0, cols - WIDTH_MEMBERS, rows, WIDTH_MEMBERS);
-    this->render();
+    //this->render();
 }
 
 void CLIUI::prepare_highlight(WINDOW *w, int index, int checkagainst, Tab requested, bool useshroud)
@@ -359,7 +359,7 @@ void CLIUI::render()
     }
 
     index = 0;
-    if(this->channels != nullptr && this->chn != nullptr)
+    if(this->channels != nullptr && this->chn != nullptr && this->srv != nullptr)
     {
         ready_window(this->channels);
         std::string servername = this->cursor.server == -1 ? "Friends" : (*this->srv)[this->cursor.server];
@@ -399,7 +399,7 @@ void CLIUI::render()
     }
 
     index = 0;
-    if(this->main != nullptr && this->msg != nullptr)
+    if(this->main != nullptr && this->msg != nullptr && this->chn != nullptr)
     {
         ready_window(this->main);
         std::string ch = (*this->chn)[this->cursor.channel];
