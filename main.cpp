@@ -64,7 +64,7 @@ void Fetcher::fetchServer()
         {
             SleepyDiscord::Channel fetched = (SleepyDiscord::Channel)this->discord->getChannel(*dm);
             this->channels.push_back(fetched);
-            this->channelnames.push_back("@" + fetched.name);
+            this->channelnames.push_back("@" + fetched.recipients[0].username);
         }
     }
     else
@@ -224,7 +224,8 @@ bool Fetcher::sendMessage(std::string msg)
 // <editor-fold> IFetcher Events
 void Fetcher::onMessage(SleepyDiscord::Message msg)
 {
-    if(msg.channelID == this->channels[curchan].ID && msg.serverID == this->servers[curserver].ID)
+    if(msg.channelID == this->channels[curchan].ID && (msg.serverID == this->servers[curserver].ID ||
+        (msg.serverID == "" && curserver == -1)))
     {
         this->messages.insert(this->messages.begin(), msg);
         this->messagecnts.insert(this->messagecnts.begin(), this->msgToString(msg, this->curserver != -1));
