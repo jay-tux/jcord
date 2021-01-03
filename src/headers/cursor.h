@@ -10,6 +10,7 @@ typedef enum _action {
     CHANGE_CHANNEL,
     SEND_MESSAGE,
     LOAD_MORE_MESSAGES,
+    POPUP_QUIT, 
     STOP
 } Action;
 

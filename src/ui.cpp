@@ -96,21 +96,6 @@ void CLIUI::highlight_shroud(WINDOW *w)
     wattron(w == nullptr ? stdscr : w, COLOR_PAIR(2 - USE_DEFAULT));
 }
 
-void ready_window(WINDOW *w)
-{
-    werase(w);
-    box(w, 0, 0);
-}
-
-void get_window(WINDOW **w, int y0, int x0, int height, int width)
-{
-    *w = newwin(height, width, y0, x0);
-    nodelay(*w, 1);
-    keypad(*w, 1);
-    ready_window(*w);
-    wrefresh(*w);
-}
-
 std::string toLength(std::string start, int len, bool centered)
 {
     int add = len - start.length();
@@ -315,6 +300,8 @@ CLIUI::CLIUI(strVec *servers, strVec *channels, strVec *users, strVec *messages,
     get_window(&this->main, 0, MAIN_OFFSET, rows - HEIGHT_TYPE, cols - MAIN_OFFSET - WIDTH_MEMBERS);
     get_window(&this->bottom, rows - HEIGHT_TYPE, MAIN_OFFSET, HEIGHT_TYPE, cols - MAIN_OFFSET - WIDTH_MEMBERS);
     get_window(&this->users, 0, cols - WIDTH_MEMBERS, rows, WIDTH_MEMBERS);
+
+    createPopup("POP", 30, 8);
     //this->render();
 }
 
@@ -434,12 +421,28 @@ void CLIUI::render()
         wrefresh(this->bottom);
     }
 
+    if(this->popup != nullptr)
+    {
+        this->popup->render();
+    }
+
     refresh();
 }
 
 Cursor *CLIUI::getCursor()
 {
     return &this->cursor;
+}
+
+Action fromPopup(PopupAction p)
+{
+    switch(p)
+    {
+        case QUIT:
+        case NOACTION: return Action::NONE;
+        case RETURN:   return Action::POPUP_QUIT;
+    }
+    return Action::NONE; //otherwise gcc yells at me
 }
 
 Action CLIUI::resolveBindings()
@@ -451,6 +454,24 @@ Action CLIUI::resolveBindings()
     this->cursor.maxchannel = this->chn->size();
     this->cursor.maxusers   = this->usr->size();
     this->cursor.maxmsg     = this->msg->size();
+
+    if(this->popup != nullptr)
+    {
+        if( IS_KEY(key, BIND_ACTION_QUIT,       BIND_ACTION_QUIT_ALT)) { return Action::STOP; }
+        act = fromPopup(this->popup->act(
+            IS_KEY(key, BIND_FOCUS_UP,          BIND_FOCUS_UP_ALT)          ? PopupInput::MOVE_UP :
+            IS_KEY(key, BIND_FOCUS_DOWN,        BIND_FOCUS_DOWN_ALT)        ? PopupInput::MOVE_DOWN :
+            IS_KEY(key, BIND_FOCUS_LEFT,        BIND_FOCUS_LEFT_ALT)        ? PopupInput::MOVE_LEFT :
+            IS_KEY(key, BIND_FOCUS_RIGHT,       BIND_FOCUS_RIGHT_ALT)       ? PopupInput::MOVE_RIGHT :
+            IS_KEY(key, BIND_ACTION_EXIT_POPUP, BIND_ACTION_EXIT_POPUP_ALT) ? PopupInput::EXIT :
+            IS_KEY(key, BIND_ACTION_ACT,        BIND_ACTION_ACT_ALT)        ? PopupInput::ACTION_GENERAL :
+            IS_KEY(key, BIND_INPUT_SEND,        BIND_INPUT_SEND_ALT)        ? PopupInput::ACTION_INPUT :
+            IS_CHR(key)                                                     ? PopupInput::KEY :
+            IS_RMF(key)                                                     ? PopupInput::DELETE :
+            IS_RMB(key)                                                     ? PopupInput::REMOVE :
+            PopupInput::NOINPUT, key));
+        return act;
+    }
 
     if(this->cursor.inputmode) //input mode -> react by updating current string, cursor and/or exit input mode
     {
@@ -497,6 +518,25 @@ Action CLIUI::resolveBindings()
     return act;
 }
 
+void CLIUI::createPopup(std::string title, int w, int h)
+{
+    if(this->popup != nullptr) { return; }
+    this->popup = new Popup(title, this->height / 2, this->width / 2, h, w);
+}
+
+void CLIUI::exitPopup()
+{
+    if(this->popup == nullptr) { return; }
+    delete this->popup;
+    this->popup = nullptr;
+    refresh();
+}
+
+bool CLIUI::inPopupMode()
+{
+    return this->popup != nullptr;
+}
+
 CLIUI::~CLIUI()
 {
     delwin(main);
@@ -504,6 +544,7 @@ CLIUI::~CLIUI()
     delwin(bottom);
     delwin(servers);
     delwin(channels);
+    if(popup != nullptr) { delete popup; }
     refresh();
     endwin();
 }

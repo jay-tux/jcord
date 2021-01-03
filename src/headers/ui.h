@@ -10,6 +10,7 @@
 #include "color.h"
 #include "keybinds.h"
 #include "offsets.h"
+#include "popup.h"
 
 #define IS_KEY(inp, key, keyalt) \
     ((key != BIND_NO_KEY && inp == key) || \
@@ -28,6 +29,9 @@ class CLIUI {
         void render();
         Cursor *getCursor();
         Action resolveBindings();
+        void createPopup(std::string, int, int);
+        void exitPopup();
+        bool inPopupMode();
 
     protected:
         void init_highlight();
@@ -47,6 +51,7 @@ class CLIUI {
         WINDOW *bottom;
         WINDOW *channels;
         WINDOW *servers;
+        Popup *popup;
         //data sources
         strVec *srv;
         strVec *chn;
