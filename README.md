@@ -22,19 +22,19 @@ Once you've downloaded all the required tools and repositories, you can get star
  1. In the JCord directory, create a two new directories: one called ``libs`` and one called ``out``.  
  1. Copy the entire sleepy-discord directory (it should contain a ``buildtools``, ``deps``, ``examples``, ``include`` and ``sleepy_discord`` directory) into your newly created ``libs`` directory.  
  1. Create a new file, ``src/token.cpp`` in the JCord directory, and put the following code into it:  
- ```cpp
- #ifndef JCORD_TOKEN
- #define JCORD_TOKEN
+    ```cpp
+    #ifndef JCORD_TOKEN
+    #define JCORD_TOKEN
 
- #include "headers/token.h"
+    #include "headers/token.h"
 
- std::string getToken()
- {
-     return "<your token>";
- }
+    std::string getToken()
+    {
+        return "<your token>";
+    }
 
- #endif
- ```
+    #endif
+    ```
  Where you replace ``<your token>`` by your bot's token (see above). This ensures the bot will login upon starting.  
  1. The next few steps are taken from the command line (yes, get that hackerman feeling!), so please open your favorite terminal (Unix/Linux) or Cygwin (or WSL, on Windows). Next, run the following commands, one by one:  
  ```sh
