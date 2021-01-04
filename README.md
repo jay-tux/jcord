@@ -5,15 +5,15 @@
 
 ## Requirements
  1. **A Discord bot account:**  
-   1. Go to https://discord.com/developers/applications and create a new Application using the blue button on top, then give it a nice name (this will be the "username" of your bot account; yes, you can change it later).  
-   1. Go to the "Bot" tab (on the left side), and hit the blue button saying "Add bot" (on the right side), then confirm your choice in the next window.  
-   1. Click the blue ``Copy`` button to copy your token (**keep this secret!** It's basically your bot's password...). You won't need it right away, but you'll need it soon.  
+    1. Go to https://discord.com/developers/applications and create a new Application using the blue button on top, then give it a nice name (this will be the "username" of your bot account; yes, you can change it later).  
+    1. Go to the "Bot" tab (on the left side), and hit the blue button saying "Add bot" (on the right side), then confirm your choice in the next window.  
+    1. Click the blue ``Copy`` button to copy your token (**keep this secret!** It's basically your bot's password...). You won't need it right away, but you'll need it soon.  
  1. **A C++ compilation stack:** if you don't know what this is, don't freak out just yet.  
-   * On Linux/Unix: I recommend installing GCC, Make and CMake (which may already be pre-installed for you) using your local package manager.  
-   * On Windows: I recommend using [Cygwin](https://cygwin.com/install.html); this will make things easier for the next steps. Make sure to add at least the ``gcc``, ``cmake``, ``make`` and ``ncurses`` packages.
+    * On Linux/Unix: I recommend installing GCC, Make and CMake (which may already be pre-installed for you) using your local package manager.  
+    * On Windows: I recommend using [Cygwin](https://cygwin.com/install.html); this will make things easier for the next steps. Make sure to add at least the ``gcc``, ``cmake``, ``make`` and ``ncurses`` packages.
  1. **NCurses:** At the moment, we use the ncurses system as our UI backend (to get that nice hackerman look), so make sure to install the library.  
-   * On Linux/Unix: Once again, install libncurses (please check if your distribution has the same name for the ncurses library) using your package manager.  
-   * On Windows: If you installed Cygwin earlier, you should already have it!  
+    * On Linux/Unix: Once again, install libncurses (please check if your distribution has the same name for the ncurses library) using your package manager.  
+    * On Windows: If you installed Cygwin earlier, you should already have it!  
  1. **Sleepy-Discord:** you can download/clone this repository from [GitHub](https://github.com/yourWaifu/sleepy-discord/).  
  1. **JCord:** you have to download/clone this repository as well, obviously!  
 
