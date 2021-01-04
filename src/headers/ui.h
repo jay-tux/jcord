@@ -29,16 +29,17 @@ class CLIUI {
         void render();
         Cursor *getCursor();
         Action resolveBindings();
-        void createPopup(std::string, int, int);
+        Popup *createPopup(std::string, int, int);
         void exitPopup();
         bool inPopupMode();
+        std::string getPopupResult();
 
     protected:
         void init_highlight();
         void highlight_on(WINDOW *);
         void highlight_shroud(WINDOW *);
         void highlight_off(WINDOW *);
-        void prepare_highlight(WINDOW *, int, int, Tab, bool);
+        void prepare_highlight(WINDOW *, int, int, int, Tab, bool);
 
     private:
         //cursor

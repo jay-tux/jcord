@@ -22,7 +22,7 @@ void reset_cursor(Cursor *curs, int channels, int users, int msgs)
 {
     curs->channel = 0;
     if(channels != -1) curs->maxchannel = channels;
-    curs->highlighted = 0;
+    curs->highlighted = (curs->focused == Tab::SERVERS) ? curs->server : (curs->focused == Tab::CHANNELS) ? curs->channel : 0;
     if(users != -1) curs->maxusers = users;
     if(msgs != -1) curs->maxmsg = msgs;
     curs->current = "";
@@ -37,11 +37,19 @@ Action send_message(Cursor *c, std::string mess)
 
 Action interact(Cursor *c)
 {
-    if(c->focused == Tab::TYPE)             return send_message(c, c->current);
-    else if(c->focused == Tab::SERVERS)     return Action::CHANGE_SERVER;
-    else if(c->focused == Tab::CHANNELS)    return Action::CHANGE_CHANNEL;
-    else if(c->focused == Tab::MESSAGES)    return Action::NONE;            // TODO: interact w messages
-    else                                    return Action::NONE;            //TODO: interact w users
+    if(c->focused == Tab::TYPE) return send_message(c, c->current);
+    else if(c->focused == Tab::SERVERS)
+    {
+        c->server = c->highlighted;
+        return Action::CHANGE_SERVER;
+    }
+    else if(c->focused == Tab::CHANNELS)
+    {
+        c->channel = c->highlighted;
+        return c->channel == c->maxchannel ? Action::NEW_DM : Action::CHANGE_CHANNEL;
+    }
+    else if(c->focused == Tab::MESSAGES) return Action::NONE; //TODO: interact w messages
+    else return Action::NONE; //TODO: interact w users
 }
 
 Action focus_up(Cursor *c)
@@ -49,10 +57,10 @@ Action focus_up(Cursor *c)
     switch(c->focused)
     {
         case Tab::SERVERS:
-            if(c->server >= 0)  c->server--;
+            if(c->highlighted >= 0)  c->highlighted--;
             break;
         case Tab::CHANNELS:
-            if(c->channel > 0) c->channel--;
+            if(c->highlighted > 0) c->highlighted--;
             break;
         case Tab::TYPE:
             c->strind = 0;
@@ -72,10 +80,10 @@ Action focus_down(Cursor *c)
     switch(c->focused)
     {
         case Tab::SERVERS:
-            if(c->server  < c->maxserver - 1)  c->server++;
+            if(c->highlighted  < c->maxserver - 1)  c->highlighted++;
             break;
         case Tab::CHANNELS:
-            if(c->channel < c->maxchannel - 1) c->channel++;
+            if(c->highlighted < c->maxchannel) c->highlighted++;
             break;
         case Tab::TYPE:
             c->strind = c->current.length();
@@ -94,7 +102,7 @@ Action focus_down(Cursor *c)
 Action focus_direct(Cursor *c, Tab t)
 {
     c->focused = t;
-    c->highlighted = 0;
+    c->highlighted = (t == Tab::SERVERS) ? c->server : (t == Tab::CHANNELS) ? c->channel : 0;
     return Action::NONE;
 }
 
@@ -108,7 +116,7 @@ Action focus_left(Cursor *c)
         case Tab::MESSAGES: c->focused = Tab::CHANNELS; break;
         case Tab::USERS:    c->focused = Tab::MESSAGES; break;
     }
-    c->highlighted = 0;
+    c->highlighted = (c->focused == Tab::SERVERS) ? c->server : (c->focused == Tab::CHANNELS) ? c->channel : 0;
     return Action::NONE;
 }
 
@@ -122,7 +130,7 @@ Action focus_right(Cursor *c)
         case Tab::MESSAGES: c->focused = Tab::USERS;    break;
         case Tab::USERS:    c->focused = Tab::USERS;    break;
     }
-    c->highlighted = 0;
+    c->highlighted = (c->focused == Tab::SERVERS) ? c->server : (c->focused == Tab::CHANNELS) ? c->channel : 0;
     return Action::NONE;
 }
 

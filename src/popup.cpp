@@ -3,6 +3,54 @@
 
 #include "headers/popup.h"
 
+std::string toLength(std::string start, int len, bool centered)
+{
+    int add = len - start.length();
+    if(add < 0)
+    {
+        return start.substr(0, len - 3) + "...";
+    }
+    else
+    {
+        std::stringstream res;
+        int left = add;
+        if(centered)
+        {
+            left = add / 2;
+            for(int i = 0; i < left; i++) { res << " "; }
+            if(add % 2 != 0) { left++; }
+        }
+        res << start;
+        for(int i = 0; i < left; i++) { res << " "; }
+        return res.str();
+    }
+}
+
+std::string lastn(std::string str, int center, int amount, int *offset)
+{
+    int len = str.length();
+    if(len <= amount)
+    {
+        *offset = 0;
+        return str.append(amount - (int)str.length(), ' ');
+    }
+
+    if(center - amount / 2 <= 0)
+    {
+        *offset = 0;
+        return str.substr(0, amount);
+    }
+
+    if(center + amount / 2 >= len)
+    {
+        *offset = len - amount;
+        return str.substr(len - amount, amount);
+    }
+
+    *offset = center - amount / 2;
+    return str.substr(center - amount / 2, center + amount / 2);
+}
+
 void ready_window(WINDOW *w)
 {
     werase(w);
@@ -27,6 +75,7 @@ Popup::Popup(std::string title, int ycenter, int xcenter, int h, int w)
     this->opts = nullptr;
     this->input = "";
     this->index = 0;
+    this->cleaned = false;
     get_window(&this->win, ycenter - h / 2, xcenter - w / 2, h, w);
     this->render();
 }
@@ -64,7 +113,7 @@ PopupAction Popup::act(PopupInput in, int key)
                 };
 
                 case PopupInput::EXIT: return PopupAction::QUIT;
-                case PopupInput::ACTION_GENERAL: return PopupAction::RETURN;
+                case PopupInput::POPUP_ACTION: return PopupAction::RETURN;
                 default: break; //stops GCC from yelling
             }
 
@@ -108,7 +157,20 @@ PopupAction Popup::act(PopupInput in, int key)
                     this->index++;
                     break;
                 }
-                case PopupInput::ACTION_INPUT: return PopupAction::RETURN;
+                case PopupInput::PASTE: {
+                    try
+                    {
+                        CClipboardXX clip;
+                        std::string inputdata;
+                        clip >> inputdata;
+                        if(this->index == (int)this->input.length()) this->input = this->input.append(inputdata);
+                        else this->input = this->input.insert(this->index, inputdata);
+                        this->index += inputdata.length();
+                    }
+                    catch(CExceptionXX &e) {} //do nothing if paste fails /shrug
+                    break;
+                }
+                case PopupInput::POPUP_ACTION: return PopupAction::RETURN;
                 case PopupInput::EXIT: return PopupAction::QUIT;
                 default: break; //stops GCC from yelling
             }
@@ -129,12 +191,34 @@ void Popup::render()
 {
     ready_window(this->win);
     mvwaddnstr(this->win, 0, 1, this->title.c_str(), this->w - 2);
+    switch(getMode())
+    {
+        case PopupMode::STRING: {
+                std::string toWrite = toLength(this->input, (this->h - 2) * (this->w - 2), true);
+                int y = 1; int x = 1;
+                for(auto chr = toWrite.begin(); chr != toWrite.end(); chr++)
+                {
+                    mvwaddch(this->win, y, x, *chr);
+                    x++;
+                    if(x >= this->w - 1) { x = 1; y++; }
+                }
+                break;
+            }
+
+        case PopupMode::CHOICES: break;
+        case PopupMode::UNINIT: break;
+    }
     wrefresh(this->win);
 }
 
-Popup::~Popup()
+void Popup::close()
 {
-    delwin(win);
+    if(cleaned) return;
+    this->cleaned = true;
+    delwin(this->win);
 }
+
+std::string Popup::getString() { return this->input; }
+std::string Popup::getOption() { return (*this->opts)[this->index]; }
 
 #endif

@@ -104,17 +104,21 @@ void Fetcher::fetchChannel()
     this->messagecnts.clear();
 
     SleepyDiscord::Channel chan = this->channels[this->curchan];
-    std::vector<SleepyDiscord::Message> msgs = this->discord->getMessages(chan.ID, FETCHKEY, chan.lastMessageID, FETCH_COUNT).vector();
-    SleepyDiscord::Message last = this->discord->getMessage(chan.ID, chan.lastMessageID);
-    this->messages.push_back(last);
-    //this->messagecnts.push_back("@" + last.author.username + ": " + last.content);
-    this->messagecnts.push_back(msgToString(last, this->curserver != -1));
-    for(auto it = msgs.begin(); it != msgs.end(); it++)
+    try
     {
-        this->messages.push_back(*it);
-        //this->messagecnts.push_back("@" + (*it).author.username + ": " + (*it).content);
-        this->messagecnts.push_back(msgToString(*it, this->curserver != -1));
+        std::vector<SleepyDiscord::Message> msgs = this->discord->getMessages(chan.ID, FETCHKEY, chan.lastMessageID, FETCH_COUNT).vector();
+        SleepyDiscord::Message last = this->discord->getMessage(chan.ID, chan.lastMessageID);
+        this->messages.push_back(last);
+        //this->messagecnts.push_back("@" + last.author.username + ": " + last.content);
+        this->messagecnts.push_back(msgToString(last, this->curserver != -1));
+        for(auto it = msgs.begin(); it != msgs.end(); it++)
+        {
+            this->messages.push_back(*it);
+            //this->messagecnts.push_back("@" + (*it).author.username + ": " + (*it).content);
+            this->messagecnts.push_back(msgToString(*it, this->curserver != -1));
+        }
     }
+    catch(SleepyDiscord::ErrorCode) {} //empty message history/message history can't be read/whatever weird nonsense is happening
 }
 
 Fetcher::Fetcher(Window *w, Connector *conn)
@@ -222,8 +226,31 @@ std::vector<std::string> *Fetcher::getMessages(int chan, int server, bool overri
 
 bool Fetcher::sendMessage(std::string msg)
 {
-    SleepyDiscord::Message res = (SleepyDiscord::Message)this->discord->sendMessage(this->channels[this->curchan].ID, msg);
-    return res.channelID.string() != "";
+    try
+    {
+        SleepyDiscord::Message res = (SleepyDiscord::Message)this->discord->sendMessage(this->channels[this->curchan].ID, msg);
+        return res.channelID.string() != "";
+    }
+    catch(SleepyDiscord::ErrorCode &e)
+    {
+        return false;
+    }
+
+}
+
+bool Fetcher::createDM(std::string uid)
+{
+    try
+    {
+        SleepyDiscord::Channel dm = (SleepyDiscord::Channel)this->discord->createDirectMessageChannel(uid);
+        this->dms->push_dm(dm.ID);
+        fetchServer();
+        return true;
+    }
+    catch(SleepyDiscord::ErrorCode &)
+    {
+        return false;
+    }
 }
 // </editor-fold>
 
@@ -307,6 +334,19 @@ void Window::start()
                     ms = this->data->getMessages(newindex, this->cli->getCursor()->server, true);
                     this->cli->getCursor()->highlighted = 0;
                     this->cli->getCursor()->maxmsg = ms->size();
+                    break;
+                }
+
+            case NEW_DM: {
+                    Popup *popup = this->cli->createPopup("Enter User ID", 50, 5);
+                    popup->initialize_input();
+                    break;
+                }
+
+            case POPUP_QUIT: {
+                    std::string uid = this->cli->getPopupResult();
+                    this->data->createDM(uid);
+                    this->cli->exitPopup();
                     break;
                 }
 

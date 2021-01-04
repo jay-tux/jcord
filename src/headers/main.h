@@ -44,6 +44,7 @@ class Fetcher : public IFetcher { //MVC: MODEL
         bool sendMessage(std::string);
         bool force_render();
         std::vector<SleepyDiscord::Server> servers;
+        bool createDM(std::string);
 
         void onMessage(SleepyDiscord::Message);
         void onReady(SleepyDiscord::Ready);

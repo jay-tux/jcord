@@ -8,9 +8,10 @@ typedef enum _action {
     NONE,
     CHANGE_SERVER,
     CHANGE_CHANNEL,
+    NEW_DM,
     SEND_MESSAGE,
     LOAD_MORE_MESSAGES,
-    POPUP_QUIT, 
+    POPUP_QUIT,
     STOP
 } Action;
 

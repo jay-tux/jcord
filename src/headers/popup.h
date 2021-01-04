@@ -4,6 +4,8 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
+#include <sstream>
+#include "../../libs/ClipboardXX/include/ClipboardXX.hpp"
 
 void ready_window(WINDOW *);
 void get_window(WINDOW **, int, int, int, int);
@@ -14,13 +16,15 @@ typedef enum _popupMode {
 
 typedef enum _popupInput {
     MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
-    ACTION_GENERAL, ACTION_INPUT, KEY, EXIT, REMOVE, DELETE,
-    NOINPUT
+    POPUP_ACTION, KEY, EXIT, REMOVE, DELETE, NOINPUT, PASTE
 } PopupInput;
 
 typedef enum _popupAction {
     NOACTION, QUIT, RETURN
 } PopupAction;
+
+std::string lastn(std::string, int, int, int *);
+std::string toLength(std::string, int, bool);
 
 class Popup {
     public:
@@ -30,7 +34,9 @@ class Popup {
         PopupMode getMode();
         PopupAction act(PopupInput, int);
         void render();
-        ~Popup();
+        void close();
+        std::string getString();
+        std::string getOption();
 
     private:
         std::string title;
@@ -41,6 +47,8 @@ class Popup {
         std::vector<std::string> *opts;
         std::string input;
         int index;
+        bool cleaned;
 };
+
 
 #endif

@@ -35,6 +35,11 @@ DMCache::DMCache()
     }
 }
 
+void DMCache::push_dm(ChannelFlake flake)
+{
+    dmCache.push_front(new ChannelFlake(flake));
+}
+
 void DMCache::finalize()
 {
     //save cache to file

@@ -41,6 +41,7 @@
 #define BIND_ACTION_EXIT_POPUP   18  //q key
 #define BIND_ACTION_INPUT_MODE  'i'  //i key (like vim)
 #define BIND_ACTION_EXIT_INPUT   9   //CTRL-I
+#define BIND_ACTION_PASTE       22   //CTRL-V
 
 //actions, alts
 #define BIND_ACTION_QUIT_ALT        BIND_NO_KEY
@@ -48,6 +49,7 @@
 #define BIND_ACTION_EXIT_POPUP_ALT  BIND_NO_KEY
 #define BIND_ACTION_INPUT_MODE_ALT  'r'
 #define BIND_ACTION_EXIT_INPUT_ALT  BIND_NO_KEY
+#define BIND_ACTION_PASTE_ALT       BIND_NO_KEY
 
 //input mode movement
 #define BIND_INPUT_FORWARD  KEY_RIGHT

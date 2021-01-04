@@ -16,6 +16,7 @@ class DMCache {
         _cache &getCache();
         void receiveDM(SleepyDiscord::Message);
         void finalize();
+        void push_dm(ChannelFlake);
 
     private:
         _cache dmCache;

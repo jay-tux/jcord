@@ -96,29 +96,6 @@ void CLIUI::highlight_shroud(WINDOW *w)
     wattron(w == nullptr ? stdscr : w, COLOR_PAIR(2 - USE_DEFAULT));
 }
 
-std::string toLength(std::string start, int len, bool centered)
-{
-    int add = len - start.length();
-    if(add < 0)
-    {
-        return start.substr(0, len - 3) + "...";
-    }
-    else
-    {
-        std::stringstream res;
-        int left = add;
-        if(centered)
-        {
-            left = add / 2;
-            for(int i = 0; i < left; i++) { res << " "; }
-            if(add % 2 != 0) { left++; }
-        }
-        res << start;
-        for(int i = 0; i < left; i++) { res << " "; }
-        return res.str();
-    }
-}
-
 void waddbox(WINDOW *w, int y0, int x0, int height, int width, std::string content)
 {
     mvwaddch(w, y0, x0, ACS_ULCORNER);
@@ -139,28 +116,6 @@ void waddbox(WINDOW *w, int y0, int x0, int height, int width, std::string conte
     }
 
     std::string toWrite = toLength(content, (height - 2) * (width - 2), true);
-    /*int amlines = content.length() / (width - 2) + 1;
-    if(amlines > height - 2)
-    {
-        content = content.substr(0, amlines * (width - 2) - 3) + "...";
-    }
-    int xo = 0;
-    int yo = 0;
-    if(amlines == 1 && content.length() < (ulong)width - 2)
-    {
-        int margin = width - content.length() - 2;
-        xo = margin / 2;
-        yo = height / 2 - 1;
-    }
-
-    int y = y0 + 1 + yo;
-    int x = x0 + 1 + xo;
-    for(auto chr = content.begin(); chr != content.end(); chr++)
-    {
-        mvwaddch(w, y, x, *chr);
-        x++;
-        if(x >= x0 + width - 1) { x = x0 + 1; y++; }
-    }*/
     int y = y0 + 1; int x = x0 + 1;
     for(auto chr = toWrite.begin(); chr != toWrite.end(); chr++)
     {
@@ -187,31 +142,6 @@ std::string firstLetters(std::string str)
         else if(add) { res += std::toupper(*chr); add = false; }
     }
     return res;
-}
-
-std::string lastn(std::string str, int center, int amount, int *offset)
-{
-    int len = str.length();
-    if(len <= amount)
-    {
-        *offset = 0;
-        return str.append(amount - (int)str.length(), ' ');
-    }
-
-    if(center - amount / 2 <= 0)
-    {
-        *offset = 0;
-        return str.substr(0, amount);
-    }
-
-    if(center + amount / 2 >= len)
-    {
-        *offset = len - amount;
-        return str.substr(len - amount, amount);
-    }
-
-    *offset = center - amount / 2;
-    return str.substr(center - amount / 2, center + amount / 2);
 }
 
 void addcursor(WINDOW *w, Cursor c, int offset)
@@ -301,16 +231,19 @@ CLIUI::CLIUI(strVec *servers, strVec *channels, strVec *users, strVec *messages,
     get_window(&this->bottom, rows - HEIGHT_TYPE, MAIN_OFFSET, HEIGHT_TYPE, cols - MAIN_OFFSET - WIDTH_MEMBERS);
     get_window(&this->users, 0, cols - WIDTH_MEMBERS, rows, WIDTH_MEMBERS);
 
-    createPopup("POP", 30, 8);
+    //createPopup("POP", 30, 8);
     //this->render();
 }
 
-void CLIUI::prepare_highlight(WINDOW *w, int index, int checkagainst, Tab requested, bool useshroud)
+void CLIUI::prepare_highlight(WINDOW *w, int index, int checkagainst, int shrouded, Tab requested, bool useshroud)
 {
-    if(index == checkagainst)
+    if(index == checkagainst && this->cursor.focused == requested)
     {
-        if(this->cursor.focused == requested) highlight_on(w);
-        else if(useshroud) highlight_shroud(w);
+        highlight_on(w);
+    }
+    else if(useshroud && index == shrouded)
+    {
+        highlight_shroud(w);
     }
     else
     {
@@ -327,7 +260,7 @@ void CLIUI::render()
     {
         ready_window(this->servers);
         //-1 = DM's
-        prepare_highlight(this->servers, index - 1, this->cursor.server, Tab::SERVERS, true);
+        prepare_highlight(this->servers, index - 1, this->cursor.highlighted, this->cursor.server, Tab::SERVERS, true);
         waddbox(this->servers, SERVER_MARGIN_Y, SERVER_MARGIN_X, SERVER_H, SERVER_W, "DM's");
         highlight_off(this->servers);
         //mvwprintw(this->servers, SERVER_MARGIN_Y, SERVER_MARGIN_X, "%d servers.", this->srv->size());
@@ -335,7 +268,7 @@ void CLIUI::render()
         int yoff = 2 * SERVER_MARGIN_Y + SERVER_H;
         for(auto server = this->srv->begin(); server != this->srv->end(); server++)
         {
-            prepare_highlight(this->servers, index, this->cursor.server, Tab::SERVERS, true);
+            prepare_highlight(this->servers, index, this->cursor.highlighted, this->cursor.server, Tab::SERVERS, true);
             waddbox(this->servers, yoff, SERVER_MARGIN_X, SERVER_H, SERVER_W, firstLetters(*server));
             highlight_off(this->servers);
 
@@ -357,13 +290,21 @@ void CLIUI::render()
         int yoff = 2 * CHANNEL_MARGIN_Y + CHANNEL_HEADER;
         for(auto channel = this->chn->begin(); channel != this->chn->end(); channel++)
         {
-            prepare_highlight(this->channels, index, this->cursor.channel, Tab::CHANNELS, true);
+            prepare_highlight(this->channels, index, this->cursor.highlighted, this->cursor.channel, Tab::CHANNELS, true);
             mvwaddnstr(this->channels, yoff, CHANNEL_MARGIN_X, toLength(*channel, CHANNEL_W, false).c_str(), CHANNEL_W);
             highlight_off(this->channels);
 
             yoff += CHANNEL_H;
             index++;
         }
+
+        if(this->cursor.server == -1 && this->cursor.focused == Tab::CHANNELS)
+        {
+            prepare_highlight(this->channels, index, this->cursor.highlighted, this->cursor.channel, Tab::CHANNELS, true);
+            mvwaddnstr(this->channels, yoff, CHANNEL_MARGIN_X, toLength("... Add someone by ID", CHANNEL_W, false).c_str(), CHANNEL_W);
+            highlight_off(this->channels);
+        }
+
         wrefresh(this->channels);
     }
 
@@ -375,7 +316,7 @@ void CLIUI::render()
         int yoff = USER_MARGIN_Y;
         for(auto user = this->usr->begin(); user != this->usr->end(); user++)
         {
-            prepare_highlight(this->users, index, this->cursor.highlighted, Tab::USERS, false);
+            prepare_highlight(this->users, index, this->cursor.highlighted, -1, Tab::USERS, false);
             mvwaddnstr(this->users, yoff, USER_MARGIN_X, (*user).c_str(), USER_W);
             highlight_off(this->users);
 
@@ -395,7 +336,7 @@ void CLIUI::render()
         int yoff = this->height - MAIN_START;
         for(auto it = this->msg->begin(); it != this->msg->end(); it++)
         {
-            prepare_highlight(this->main, index, this->cursor.highlighted, Tab::MESSAGES, false);
+            prepare_highlight(this->main, index, this->cursor.highlighted, -1, Tab::MESSAGES, false);
             yoff = addMessage(this->main, yoff, MAIN_MARGIN_X, MAIN_MINY + MAIN_HEADER, this->width - MAIN_DIFF, *it, MAIN_MSG_TAB);
             highlight_off(this->main);
 
@@ -407,7 +348,7 @@ void CLIUI::render()
     if(this->bottom != nullptr)
     {
         ready_window(this->main);
-        prepare_highlight(this->bottom, 0, 0, Tab::TYPE, false);
+        prepare_highlight(this->bottom, 0, 0, -1, Tab::TYPE, false);
         box(this->bottom, 0, 0);
         highlight_off(this->bottom);
 
@@ -464,8 +405,8 @@ Action CLIUI::resolveBindings()
             IS_KEY(key, BIND_FOCUS_LEFT,        BIND_FOCUS_LEFT_ALT)        ? PopupInput::MOVE_LEFT :
             IS_KEY(key, BIND_FOCUS_RIGHT,       BIND_FOCUS_RIGHT_ALT)       ? PopupInput::MOVE_RIGHT :
             IS_KEY(key, BIND_ACTION_EXIT_POPUP, BIND_ACTION_EXIT_POPUP_ALT) ? PopupInput::EXIT :
-            IS_KEY(key, BIND_ACTION_ACT,        BIND_ACTION_ACT_ALT)        ? PopupInput::ACTION_GENERAL :
-            IS_KEY(key, BIND_INPUT_SEND,        BIND_INPUT_SEND_ALT)        ? PopupInput::ACTION_INPUT :
+            IS_KEY(key, BIND_ACTION_ACT,        BIND_ACTION_ACT_ALT)        ? PopupInput::POPUP_ACTION :
+            IS_KEY(key, BIND_INPUT_SEND,        BIND_INPUT_SEND_ALT)        ? PopupInput::POPUP_ACTION :
             IS_CHR(key)                                                     ? PopupInput::KEY :
             IS_RMF(key)                                                     ? PopupInput::DELETE :
             IS_RMB(key)                                                     ? PopupInput::REMOVE :
@@ -518,16 +459,17 @@ Action CLIUI::resolveBindings()
     return act;
 }
 
-void CLIUI::createPopup(std::string title, int w, int h)
+Popup *CLIUI::createPopup(std::string title, int w, int h)
 {
-    if(this->popup != nullptr) { return; }
+    if(this->popup != nullptr) { return this->popup; }
     this->popup = new Popup(title, this->height / 2, this->width / 2, h, w);
+    return this->popup;
 }
 
 void CLIUI::exitPopup()
 {
     if(this->popup == nullptr) { return; }
-    delete this->popup;
+    this->popup->close();
     this->popup = nullptr;
     refresh();
 }
@@ -537,6 +479,18 @@ bool CLIUI::inPopupMode()
     return this->popup != nullptr;
 }
 
+std::string CLIUI::getPopupResult()
+{
+    if(this->popup == nullptr) { return ""; }
+    switch(this->popup->getMode())
+    {
+        case PopupMode::UNINIT:  return "";
+        case PopupMode::STRING:  return this->popup->getString();
+        case PopupMode::CHOICES: return this->popup->getOption();
+    }
+    return "";
+}
+
 CLIUI::~CLIUI()
 {
     delwin(main);
@@ -544,7 +498,7 @@ CLIUI::~CLIUI()
     delwin(bottom);
     delwin(servers);
     delwin(channels);
-    if(popup != nullptr) { delete popup; }
+    if(popup != nullptr) { delete popup; popup = nullptr; }
     refresh();
     endwin();
 }
