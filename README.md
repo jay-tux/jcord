@@ -35,18 +35,18 @@ Once you've downloaded all the required tools and repositories, you can get star
 
     #endif
     ```
- Where you replace ``<your token>`` by your bot's token (see above). This ensures the bot will login upon starting.  
+    Where you replace ``<your token>`` by your bot's token (see above). This ensures the bot will login upon starting.  
  1. The next few steps are taken from the command line (yes, get that hackerman feeling!), so please open your favorite terminal (Unix/Linux) or Cygwin (or WSL, on Windows). Next, run the following commands, one by one:  
- ```sh
- cd "<install location of jcord>/out/"
- cmake ..
- make jcord
- ```  
- If everything went well, the last few lines should look like this:  
- ```
- [ 97%] Linking CXX executable jcord
- [100%] Built target jcord
- ```
+    ```sh
+    cd "<install location of jcord>/out/"
+    cmake ..
+    make jcord
+    ```  
+    If everything went well, the last few lines should look like this:  
+    ```
+    [ 97%] Linking CXX executable jcord
+    [100%] Built target jcord
+    ```
 
 If you got this far, congratulations! You can now actually use JCord to have fun and show off your super awesome new Discord client to your friends!
 
