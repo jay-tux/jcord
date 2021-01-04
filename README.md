@@ -145,7 +145,103 @@ A lot of scary lines, right? Let's delve in (in the count, I'll skip the empty l
    * ``<COMPONENT>`` is one of ``INDEX`` (ncurses color index), ``R`` (red component), ``G`` (green component) or ``B`` (blue component). Not that *ncurses colors range from 0 to 1000, not 0 to 256*.
 
 ### Changing keybindings
-***TODO***
+JCord doesn't use your mouse, instead, you can use your keyboard. You can find the default bindings in the ``default_keymap`` file, but it boils down to this:
+ - WASD to move,  
+ - all keys around the WASD are also assigned, see the keymap file,  
+ - Enter or Space to select (send),  
+ - I to enter input mode (sending mode) and CTRL-I to exit it again,  
+ - Arrow keys to move around in input mode,  
+ - CTRL-D to quit.  
+
+However, you can change them (but you have to rebuild JCord after you do so...). The file ``src/headers/keybinds.h`` contains all the options. Each of the options has a normal and alternative binding.  
+
+The default configuration is listed below:  
+```cpp
+#define BIND_NO_KEY (-1)
+
+//direct focus
+#define BIND_FOCUS_SERVER   'z'
+#define BIND_FOCUS_CHANNEL  'x'
+#define BIND_FOCUS_TYPE     'c'
+#define BIND_FOCUS_MEMBERS  'f'
+#define BIND_FOCUS_MESSAGES 'e'
+
+//direct focus, alts
+#define BIND_FOCUS_SERVER_ALT   BIND_NO_KEY
+#define BIND_FOCUS_CHANNEL_ALT  BIND_NO_KEY
+#define BIND_FOCUS_TYPE_ALT     BIND_NO_KEY
+#define BIND_FOCUS_MEMBERS_ALT  BIND_NO_KEY
+#define BIND_FOCUS_MESSAGES_ALT BIND_NO_KEY
+
+//indirect focus
+#define BIND_FOCUS_UP    KEY_UP
+#define BIND_FOCUS_DOWN  KEY_DOWN
+#define BIND_FOCUS_LEFT  KEY_LEFT
+#define BIND_FOCUS_RIGHT KEY_RIGHT
+
+//indirect focus, alts
+#define BIND_FOCUS_UP_ALT     'w'
+#define BIND_FOCUS_DOWN_ALT   's'
+#define BIND_FOCUS_LEFT_ALT   'a'
+#define BIND_FOCUS_RIGHT_ALT  'd'
+
+//actions
+#define BIND_ACTION_QUIT         4   //CTRL-D
+#define BIND_ACTION_ACT        '\n'  //RETURN
+#define BIND_ACTION_EXIT_POPUP   18  //q key
+#define BIND_ACTION_INPUT_MODE  'i'  //i key (like vim)
+#define BIND_ACTION_EXIT_INPUT   9   //CTRL-I
+#define BIND_ACTION_PASTE       22   //CTRL-V
+
+//actions, alts
+#define BIND_ACTION_QUIT_ALT        BIND_NO_KEY
+#define BIND_ACTION_ACT_ALT         ' '
+#define BIND_ACTION_EXIT_POPUP_ALT  BIND_NO_KEY
+#define BIND_ACTION_INPUT_MODE_ALT  'r'
+#define BIND_ACTION_EXIT_INPUT_ALT  BIND_NO_KEY
+#define BIND_ACTION_PASTE_ALT       BIND_NO_KEY
+
+//input mode movement
+#define BIND_INPUT_FORWARD  KEY_RIGHT
+#define BIND_INPUT_BACKWARD KEY_LEFT
+#define BIND_INPUT_BEGIN    KEY_UP
+#define BIND_INPUT_END      KEY_DOWN
+#define BIND_INPUT_SEND     KEY_ENTER
+
+//input mode movement, alts
+#define BIND_INPUT_FORWARD_ALT  BIND_NO_KEY
+#define BIND_INPUT_BACKWARD_ALT BIND_NO_KEY
+#define BIND_INPUT_BEGIN_ALT    BIND_NO_KEY
+#define BIND_INPUT_END_ALT      BIND_NO_KEY
+#define BIND_INPUT_SEND_ALT     '\n'        //key_enter not always caught?
+```
+
+The ``BIND_NO_KEY`` constant is used to effectively "unbind" an action.  
+There are four options to define a key:  
+ - ``BIND_NO_KEY`` (no key),  
+ - any character (bind to the key sequence that results in that character),  
+ - any ncurses macro (if you know them), or  
+ - any integer (the corresponding ncurses value is used).  
+
+For the more "special" keybindings, you can use the helper program in ``helpers/ncurses_bindings.c``. You first have to compile it with GCC first, though. Running it will result in an empty screen. After you press any key (or any combination of keys), the program will print the key name and integer value.  
+Alternatively, there's the ``ncurses_keys`` file, which lists (all) keybindings with their integer values. However, this list could be different depending on your platform and console (which you can check using the ``helpers/ncurses_list.c`` program).  
+
+Both helper programs can be compiled using the following command:  
+```sh
+gcc -o "name of output file" -lncurses "name of source file"
+```
+Don't forget the ``-lncurses`` option, or you'll get the following error (or something similar):  
+```
+/usr/bin/ld: /tmp/ccTbUDfF.o: warning: relocation against `stdscr' in read-only section `.text'
+/usr/bin/ld: /tmp/ccTbUDfF.o: in function `main':
+tmp.c:(.text+0x9): undefined reference to `initscr'
+/usr/bin/ld: tmp.c:(.text+0x10): undefined reference to `stdscr'
+/usr/bin/ld: tmp.c:(.text+0x18): undefined reference to `wgetch'
+/usr/bin/ld: tmp.c:(.text+0x20): undefined reference to `endwin'
+/usr/bin/ld: tmp.c:(.text+0x2a): undefined reference to `keyname'
+/usr/bin/ld: warning: creating DT_TEXTREL in a PIE
+collect2: error: ld returned 1 exit status
+```
 
 ### Changing offsets
 ***TODO***
