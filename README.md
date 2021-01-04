@@ -244,4 +244,10 @@ collect2: error: ld returned 1 exit status
 ```
 
 ### Changing offsets
-***TODO***
+All positioning is done by the settings in the ``src/headers/offsets.h`` file. It defines a lot of offsets/sizes/... to make sure everything is positioned correctly.  
+Everything before line 26 can be changed. Be very careful when modifying the last lines because those are used to avoid repeated computations.  
+Among others, the following values are defined:  
+ - The width of all panels (the width of the main panel is inferred from the others),  
+ - The height of the input bar,  
+ - The X and Y margins for all panels,  
+ - The offsets between two servers/channels/members.

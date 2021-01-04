@@ -22,6 +22,8 @@
 #define USER_H 2
 #define CHANNEL_HEADER 5
 #define MAIN_HEADER 5
+
+//do not change: some default/easy macros to avoid repeated computations
 #define SERVER_W (WIDTH_SERVERS - 2 * SERVER_MARGIN_X)
 #define CHANNEL_W (WIDTH_CHANNELS - 2 * CHANNEL_MARGIN_X)
 #define USER_W (WIDTH_MEMBERS - 2 * USER_MARGIN_X)
