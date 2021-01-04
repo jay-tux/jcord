@@ -15,12 +15,15 @@
     * On Linux/Unix: Once again, install libncurses (please check if your distribution has the same name for the ncurses library) using your package manager.  
     * On Windows: If you installed Cygwin earlier, you should already have it!  
  1. **Sleepy-Discord:** you can download/clone this repository from [GitHub](https://github.com/yourWaifu/sleepy-discord/).  
+ 1. **ClipboardXX:** you can download/clone this repository from [GitHub](https://github.com/Arian8j2/ClipboardXX) as well.
  1. **JCord:** you have to download/clone this repository as well, obviously!  
 
 ## Building
+*If you've downloaded all required components/tools, and you're on Linux/Unix, then you can use the (bash) script in ``helpers/setup.bash`` to build JCord from scratch.*  
 Once you've downloaded all the required tools and repositories, you can get started on building:  
  1. In the JCord directory, create a two new directories: one called ``libs`` and one called ``out``.  
  1. Copy the entire sleepy-discord directory (it should contain a ``buildtools``, ``deps``, ``examples``, ``include`` and ``sleepy_discord`` directory) into your newly created ``libs`` directory.  
+ 1. Copy the entire ClipboardXX directory (it should contain a ``examples`` and ``include`` directory) to your ``libs`` directory.
  1. Create a new file, ``src/token.cpp`` in the JCord directory, and put the following code into it:  
     ```cpp
     #ifndef JCORD_TOKEN
