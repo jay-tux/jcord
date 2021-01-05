@@ -72,7 +72,6 @@ Popup::Popup(std::string title, int ycenter, int xcenter, int h, int w)
     this->w = w;
     this->h = h;
     this->useinput = false;
-    this->opts = nullptr;
     this->input = "";
     this->index = 0;
     this->cleaned = false;
@@ -80,17 +79,21 @@ Popup::Popup(std::string title, int ycenter, int xcenter, int h, int w)
     this->render();
 }
 
-void Popup::initialize_choices(std::vector<std::string> *choices)
+void Popup::initialize_choices(int count, ...)
 {
-    if(this->opts == nullptr && !useinput)
+    std::va_list lst;
+    va_start(lst, count);
+    for(int i = 0; i < count; i++)
     {
-        this->opts = choices;
+        std::string item = va_arg(lst, std::string);
+        this->opts.push_back(item);
     }
+    va_end(lst);
 }
 
 void Popup::initialize_input()
 {
-    if(this->opts == nullptr)
+    if(this->opts.size() == 0)
     {
         this->useinput = true;
     }
@@ -104,11 +107,11 @@ PopupAction Popup::act(PopupInput in, int key)
             switch(in)
             {
                 case PopupInput::MOVE_UP: {
-                    if(this->index >0) this->index--;
+                    if(this->index > 0) this->index--;
                     break;
                 };
                 case PopupInput::MOVE_DOWN: {
-                    if(this->index < (int)this->opts->size() - 1) this->index++;
+                    if(this->index < (int)this->opts.size() - 1) this->index++;
                     break;
                 };
 
@@ -182,8 +185,8 @@ PopupAction Popup::act(PopupInput in, int key)
 
 PopupMode Popup::getMode()
 {
-    if(this->opts != nullptr) return PopupMode::CHOICES;
-    if(this->useinput)        return PopupMode::STRING;
+    if(this->opts.size() != 0) return PopupMode::CHOICES;
+    if(this->useinput)         return PopupMode::STRING;
     return PopupMode::UNINIT;
 }
 
@@ -205,7 +208,20 @@ void Popup::render()
                 break;
             }
 
-        case PopupMode::CHOICES: break;
+        case PopupMode::CHOICES: {
+                int yoff = this->h / 2 - this->opts.size() / 2;
+                if(yoff <= 0) yoff = 1;
+                std::string toWrite;
+                for(auto opt = this->opts.begin(); opt != this->opts.end(); opt++)
+                {
+                    if(yoff == h) break;
+                    toWrite = toLength(*opt, this->w - 2, true);
+                    mvwaddnstr(this->win, yoff, 1, toWrite.c_str(), this->w - 2);
+                    yoff++;
+                }
+                break;
+            }
+
         case PopupMode::UNINIT: break;
     }
     wrefresh(this->win);
@@ -219,6 +235,6 @@ void Popup::close()
 }
 
 std::string Popup::getString() { return this->input; }
-std::string Popup::getOption() { return (*this->opts)[this->index]; }
+std::string Popup::getOption() { return this->opts[this->index]; }
 
 #endif

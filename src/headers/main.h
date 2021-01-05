@@ -27,6 +27,10 @@
 
 typedef SleepyDiscord::Snowflake<SleepyDiscord::Server> ServerFlake;
 
+typedef enum _popupType {
+    NO_POPUP, DM_POPUP, USER_POPUP, MEMBER_POPUP, MESSAGE_POPUP
+} PopupType;
+
 class Window;
 
 class Fetcher : public IFetcher { //MVC: MODEL
@@ -52,6 +56,7 @@ class Fetcher : public IFetcher { //MVC: MODEL
     protected:
         void fetchServer();
         void fetchChannel();
+        void fetchRecipients(int);
         bool ready;
     private:
         std::string msgToString(SleepyDiscord::Message, bool);
@@ -80,6 +85,7 @@ class Window {
     private:
         Fetcher *data;
         CLIUI *cli;
+        PopupType popup;
 };
 
 #endif

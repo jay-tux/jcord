@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cstdarg>
 #include "../../libs/ClipboardXX/include/ClipboardXX.hpp"
 
 void ready_window(WINDOW *);
@@ -29,7 +30,7 @@ std::string toLength(std::string, int, bool);
 class Popup {
     public:
         Popup(std::string, int, int, int, int);
-        void initialize_choices(std::vector<std::string> *);
+        void initialize_choices(int, ...);
         void initialize_input();
         PopupMode getMode();
         PopupAction act(PopupInput, int);
@@ -44,7 +45,7 @@ class Popup {
         int h;
         WINDOW *win;
         bool useinput;
-        std::vector<std::string> *opts;
+        std::vector<std::string> opts;
         std::string input;
         int index;
         bool cleaned;

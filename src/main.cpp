@@ -154,12 +154,6 @@ void Fetcher::stop()
 
 std::vector<std::string> *Fetcher::getChannelnames(int index)
 {
-    /*if(index == -1)
-    {
-        this->curserver = index;
-        return &this->discord->DMnames;
-    }*/
-
     if(index == this->curserver) { return &this->channelnames; }
 
     if(index < (int)this->servers.size() && index >= -1)
@@ -184,6 +178,22 @@ std::vector<std::string> *Fetcher::getMembernames(int index)
     }
 
     return nullptr;
+}
+
+void Fetcher::fetchRecipients(int dmchannel)
+{
+    if(this->curserver == -1)
+    {
+        SleepyDiscord::Channel chan = this->discord->getChannel(this->channels[dmchannel]);
+        this->members.clear();
+        this->membernames.clear();
+        for(auto it = chan.recipients.begin(); it != chan.recipients.end(); it++)
+        {
+            SleepyDiscord::User u = *it;
+            this->members.push_back(u);
+            this->membernames.push_back("@" + u.username + "#" + u.discriminator);
+        }
+    }
 }
 
 bool Fetcher::force_render()
@@ -218,6 +228,7 @@ std::vector<std::string> *Fetcher::getMessages(int chan, int server, bool overri
             this->messagecnts.clear();
             this->messages.clear();
         }
+        if(this->curserver == -1) { fetchRecipients(chan); }
         return &this->messagecnts;
     }
 
@@ -288,7 +299,7 @@ void Fetcher::onReady(SleepyDiscord::Ready r) {
 // <editor-fold> Window
 Window::Window()
 {
-
+    this->popup = PopupType::NO_POPUP;
 }
 
 Window::~Window()
@@ -340,14 +351,31 @@ void Window::start()
             case NEW_DM: {
                     Popup *popup = this->cli->createPopup("Enter User ID", 50, 5);
                     popup->initialize_input();
+                    this->popup = DM_POPUP;
                     break;
                 }
 
+            case USER_DETAILS: {
+                    Popup *popup = this->cli->createPopup("User details", 50, 20);
+                    //cast for va_arg etc
+                    popup->initialize_choices(1, (std::string)"Username");
+                }
+
             case POPUP_QUIT: {
-                    std::string uid = this->cli->getPopupResult();
-                    this->data->createDM(uid);
-                    this->cli->exitPopup();
-                    break;
+                    switch(this->popup)
+                    {
+                        case DM_POPUP: {
+                            std::string uid = this->cli->getPopupResult();
+                            this->data->createDM(uid);
+                            this->cli->exitPopup();
+                            break;
+                        }
+
+                        case USER_POPUP: break;
+                        case MEMBER_POPUP: break;
+                        case MESSAGE_POPUP: break;
+                        case NO_POPUP: break;
+                    }
                 }
 
             case SEND_MESSAGE: {

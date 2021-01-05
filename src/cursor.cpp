@@ -37,19 +37,20 @@ Action send_message(Cursor *c, std::string mess)
 
 Action interact(Cursor *c)
 {
-    if(c->focused == Tab::TYPE) return send_message(c, c->current);
-    else if(c->focused == Tab::SERVERS)
+    switch(c->focused)
     {
-        c->server = c->highlighted;
-        return Action::CHANGE_SERVER;
+        case Tab::SERVERS: {
+            c->server = c->highlighted;
+            return Action::CHANGE_SERVER;
+        }
+        case Tab::CHANNELS: {
+            c->channel = c->highlighted;
+            return c->channel == c->maxchannel ? Action::NEW_DM : Action::CHANGE_CHANNEL;
+        }
+        case Tab::TYPE:     return send_message(c, c->current);
+        case Tab::USERS:    return c->server == -1 ? USER_DETAILS : MEMBER_DETAILS;
+        case Tab::MESSAGES: return Action::MESSAGE_OPTIONS;
     }
-    else if(c->focused == Tab::CHANNELS)
-    {
-        c->channel = c->highlighted;
-        return c->channel == c->maxchannel ? Action::NEW_DM : Action::CHANGE_CHANNEL;
-    }
-    else if(c->focused == Tab::MESSAGES) return Action::NONE; //TODO: interact w messages
-    else return Action::NONE; //TODO: interact w users
 }
 
 Action focus_up(Cursor *c)
