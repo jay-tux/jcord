@@ -33,6 +33,7 @@ class CLIUI {
         void exitPopup();
         bool inPopupMode();
         std::string getPopupResult();
+        std::string getNth(int, Tab);
 
     protected:
         void init_highlight();

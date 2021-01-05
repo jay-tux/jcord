@@ -491,6 +491,18 @@ std::string CLIUI::getPopupResult()
     return "";
 }
 
+std::string CLIUI::getNth(int index, Tab source)
+{
+    switch(source)
+    {
+        case Tab::SERVERS:  return (*this->srv)[index];
+        case Tab::CHANNELS: return (*this->chn)[index];
+        case Tab::MESSAGES: return (*this->msg)[index];
+        case Tab::USERS:    return (*this->usr)[index];
+        case Tab::TYPE:     return "";
+    }
+}
+
 CLIUI::~CLIUI()
 {
     delwin(main);

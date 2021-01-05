@@ -356,9 +356,11 @@ void Window::start()
                 }
 
             case USER_DETAILS: {
-                    Popup *popup = this->cli->createPopup("User details", 50, 20);
-                    //cast for va_arg etc
-                    popup->initialize_choices(1, (std::string)"Username");
+                    break; //nothing useful to do
+                }
+
+            case MEMBER_DETAILS: {
+                    break;
                 }
 
             case POPUP_QUIT: {
