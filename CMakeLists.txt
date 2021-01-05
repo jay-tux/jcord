@@ -2,7 +2,7 @@
 cmake_minimum_required (VERSION 3.6)
 project(jcord)
 
-add_executable(jcord src/token.cpp src/fetcher.cpp src/connector.cpp src/dmcache.cpp src/popup.cpp src/cursor.cpp src/ui.cpp src/main.cpp)
+add_executable(jcord src/token.cpp src/fetcher.cpp src/window.cpp src/connector.cpp src/dmcache.cpp src/popup.cpp src/cursor.cpp src/ui.cpp src/main.cpp)
 
 add_subdirectory(libs/sleepy-discord)
 add_subdirectory(libs/ClipboardXX)
