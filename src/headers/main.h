@@ -13,6 +13,6 @@
 #include <functional>
 #include <cctype>
 
-typedef SleepyDiscord::Snowflake<SleepyDiscord::Server> ServerFlake;
+int main();
 
 #endif
