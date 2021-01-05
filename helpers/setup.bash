@@ -42,12 +42,12 @@ fi
 echo " --- All libraries copied/detected! --- "
 
 echo " --- Attempting to detect required tools... --- "
-if [ ! command -v cmake ]; then
+if ! command -v cmake; then
     echo "CMake could not be found. Exiting"
     exit 1
 fi
 
-if [ ! command -v make ]; then
+if ! command -v make; then
     echo "Make could not be found. Exiting"
     exit 1
 fi
